@@ -1,35 +1,47 @@
 import {
-  FaLinkedin,
-  FaGithub,
-  FaStackOverflow,
-  FaFacebook,
-  FaInstagram,
-} from 'react-icons/fa';
+  FiLinkedin,
+  FiGithub,
+  FiFacebook,
+  FiInstagram,
+} from 'react-icons/fi';
+
+import {
+  SiStackoverflow,
+} from 'react-icons/si';
+
+import {
+  ImSteam,
+} from 'react-icons/im';
 
 const SocialShare = [
   {
     name: 'LinkedIn',
-    icon: <FaLinkedin />,
+    icon: <FiLinkedin />,
     link: 'https://www.linkedin.com/in/tsilenzio/',
   },
   {
     name: 'Github',
-    icon: <FaGithub />,
+    icon: <FiGithub />,
     link: 'https://github.com/tsilenzio/',
   },
   {
     name: 'StackOverflow',
-    icon: <FaStackOverflow />,
+    icon: <SiStackoverflow />,
     link: 'https://stackoverflow.com/users/4954281/taylor-silenzio/',
   },
   {
+    name: 'Steam',
+    icon: <ImSteam />,
+    link: 'https://steamcommunity.com/id/nebXden/',
+  },
+  {
     name: 'Facebook',
-    icon: <FaFacebook />,
+    icon: <FiFacebook />,
     link: 'https://www.facebook.com/tsilenzio/',
   },
   {
     name: 'Instagram',
-    icon: <FaInstagram />,
+    icon: <FiInstagram />,
     link: 'https://instagram.com/tsilenzio/',
   },
 ];

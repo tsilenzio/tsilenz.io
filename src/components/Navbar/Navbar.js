@@ -1,56 +1,49 @@
 // import React, { useState } from 'react';
+
 import {
-  FaHome,
-  FaUserAlt,
-  FaFileAlt,
-  FaAddressCard,
-} from 'react-icons/fa';
+  RiHome2Line,
+  RiUserLine,
+  RiArticleLine,
+  RiMailOpenLine,
+} from 'react-icons/ri';
+
 import './Navbar.scss';
 
 const NavContent = [
   {
     caption: 'Home',
     link: '#home',
-    icon: <FaHome />,
+    icon: <RiHome2Line />,
     activeClass: 'active',
   },
   {
     caption: 'About',
     link: '#about',
-    icon: <FaUserAlt />,
+    icon: <RiUserLine />,
     activeClass: '',
   },
   {
     caption: 'Blog',
     link: '#blog',
-    icon: <FaFileAlt />,
+    icon: <RiArticleLine />,
     activeClass: '',
   },
   {
     caption: 'Contact',
     link: '#contact',
-    icon: <FaAddressCard />,
+    icon: <RiMailOpenLine />,
     activeClass: '',
   },
 ];
 
 const Navbar = () => {
-  // const [links, setLinks] = useState({});
-
-  // NavContent.forEach(item => {
-  //   if (!links[item.link]) {
-  //     const newLink = <a href={item.link}>{item.caption}</a>;
-  //     setLinks(prevState => ({ ...prevState, [item.link]: newLink }));
-  //   }
-  // });
-
   return (
     <header className="navbar">
       <nav className="navbar__menu" role="navigation">
         <ul className="navbar__row">
           {NavContent.map(item => (
             <li key={item.link} className="navbar__list">
-              <div className="navbar__inner">
+              <div className="sidebar__inner">
                 <a
                   href={item.link}
                   className={item.activeClass}
