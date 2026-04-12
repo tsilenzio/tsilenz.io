@@ -1,0 +1,63 @@
+---
+import ProjectCard from './ProjectCard.astro';
+
+const projects = [
+  {
+    title: 'whoami.tsilenz.io',
+    description:
+      'An SSH server that identifies visitors by their public keys. Connect and see what it knows about you.',
+    status: 'Planned' as const,
+    tech: ['Rust', 'SSH', 'GitHub API'],
+    href: 'https://github.com/tsilenzio',
+  },
+  {
+    title: 'diorama',
+    description:
+      'TUI tool for previewing terminal color themes with realistic scenarios. See how your colors actually look before committing.',
+    status: 'Active' as const,
+    tech: ['Rust', 'TUI', 'Terminal'],
+    href: 'https://github.com/tsilenzio/diorama',
+  },
+  {
+    title: 'Analytics Engine',
+    description:
+      'Self-hosted visitor analytics with fingerprint-based tracking, GeoIP, and a public dashboard. The thing tracking visits on this site.',
+    status: 'Planned' as const,
+    tech: ['Rust', 'SQLite', 'GeoIP'],
+  },
+  {
+    title: 'rune-keychain',
+    description: 'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
+    status: 'Active' as const,
+    tech: ['Rust', 'CLI'],
+    href: 'https://github.com/tsilenzio/rune-keychain',
+  },
+  {
+    title: 'tokify',
+    description:
+      'Cross-platform token counter for GPT models. Counts tokens per-file and across entire directories.',
+    status: 'Active' as const,
+    tech: ['Node.js', 'CLI', 'OpenAI'],
+    href: 'https://github.com/tsilenzio/tokify',
+  },
+  {
+    title: 'docker-caddy-cloudflare-proxy',
+    description:
+      'Docker Compose setup for Caddy with automatic Cloudflare DNS validation and reverse proxy to other containers.',
+    status: 'Active' as const,
+    tech: ['Docker', 'Caddy', 'Cloudflare'],
+    href: 'https://github.com/tsilenzio/docker-caddy-cloudflare-proxy',
+  },
+];
+---
+
+<section id="projects" class="mx-auto max-w-3xl px-6 pb-20">
+  <h2 class="mb-6 text-xl font-semibold">Projects</h2>
+  <div class="grid gap-4 sm:grid-cols-2">
+    {
+      projects.map((project) => (
+        <ProjectCard {...project} />
+      ))
+    }
+  </div>
+</section>

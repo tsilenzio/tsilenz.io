@@ -1,0 +1,49 @@
+---
+const jobs = [
+  {
+    company: 'Company Name',
+    role: 'Senior Software Engineer',
+    period: '2022 — Present',
+    description: 'Placeholder for your current role and responsibilities.',
+  },
+  {
+    company: 'Previous Company',
+    role: 'Software Engineer',
+    period: '2019 — 2022',
+    description: 'Placeholder for previous role details.',
+  },
+  {
+    company: 'Earlier Company',
+    role: 'Junior Developer',
+    period: '2016 — 2019',
+    description: 'Placeholder for earlier career experience.',
+  },
+];
+---
+
+<section id="experience" class="mx-auto max-w-3xl px-6 pb-20">
+  <h2 class="mb-6 text-xl font-semibold">Experience</h2>
+  <div class="space-y-0">
+    {
+      jobs.map((job, i) => (
+        <div class="relative pl-6 pb-8 last:pb-0">
+          {/* timeline line */}
+          {i < jobs.length - 1 && (
+            <div class="absolute top-2.5 left-[3px] h-full w-px bg-(--color-border)" />
+          )}
+          {/* dot */}
+          <div class="absolute top-2 left-0 size-[7px] rounded-full bg-(--color-accent)" />
+
+          <div class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+            <div>
+              <h3 class="font-medium">{job.role}</h3>
+              <p class="text-sm text-(--color-accent)">{job.company}</p>
+            </div>
+            <span class="text-sm text-(--color-text-muted) shrink-0">{job.period}</span>
+          </div>
+          <p class="mt-2 text-sm text-(--color-text-muted)">{job.description}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>

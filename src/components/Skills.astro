@@ -1,0 +1,36 @@
+---
+const categories = [
+  {
+    name: 'Languages',
+    items: ['Rust', 'TypeScript', 'JavaScript', 'Python', 'PHP', 'Shell', 'SQL'],
+  },
+  {
+    name: 'Infrastructure',
+    items: ['Docker', 'Nginx', 'Caddy', 'Cloudflare', 'Linux', 'CI/CD'],
+  },
+  {
+    name: 'Tools & Frameworks',
+    items: ['Node.js', 'Git', 'PostgreSQL', 'SQLite', 'Redis', 'Astro'],
+  },
+];
+---
+
+<section class="mx-auto max-w-3xl px-6 pb-20">
+  <h2 class="mb-6 text-xl font-semibold">Skills</h2>
+  <div class="space-y-5">
+    {
+      categories.map(({ name, items }) => (
+        <div>
+          <h3 class="mb-2.5 text-sm font-medium text-(--color-text-muted)">{name}</h3>
+          <div class="flex flex-wrap gap-2">
+            {items.map((item) => (
+              <span class="rounded-md border border-(--color-border) bg-(--color-bg-alt) px-3 py-1 text-sm">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
