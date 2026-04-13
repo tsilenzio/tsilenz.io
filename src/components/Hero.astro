@@ -8,13 +8,18 @@ const socials = [
 <section class="mx-auto max-w-3xl px-6 pt-24 pb-16">
   <div class="flex items-start gap-6">
     <div class="flex-1">
-      <h1 class="text-4xl font-bold tracking-tight">Taylor Silenzio</h1>
-      <p class="mt-2 text-lg text-(--color-text-muted)">Software Engineer</p>
-      <p class="mt-4 max-w-lg text-(--color-text-muted)">
+      <h1 class="text-4xl font-bold tracking-tight animate-fade-in">Taylor Silenzio</h1>
+      <p
+        class="mt-2 text-lg text-(--color-text-muted) animate-fade-in"
+        style="animation-delay: 60ms"
+      >
+        Software Engineer
+      </p>
+      <p class="mt-4 max-w-lg text-(--color-text-muted) animate-fade-in" style="animation-delay: 120ms">
         I build tools and infrastructure. Currently focused on backend systems, developer tooling,
         and exploring what Rust can do in the places I used to reach for Node.
       </p>
-      <div class="mt-5 flex gap-3">
+      <div class="mt-5 flex gap-3 animate-fade-in" style="animation-delay: 180ms">
         {
           socials.map(({ href, label, icon }) => (
             <a
@@ -39,7 +44,7 @@ const socials = [
         }
       </div>
     </div>
-    <div class="hidden sm:block">
+    <div class="hidden sm:block animate-fade-in" style="animation-delay: 100ms">
       <div
         class="size-28 rounded-full bg-(--color-bg-alt) border border-(--color-border) flex items-center justify-center text-(--color-text-muted) text-sm"
       >

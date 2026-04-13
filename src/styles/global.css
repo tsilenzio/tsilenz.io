@@ -66,3 +66,91 @@ code {
   font-family: var(--font-mono);
   font-size: 0.9em;
 }
+
+/* entrance animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+/* prose styles for blog posts */
+.prose {
+  line-height: 1.75;
+}
+
+.prose h2 {
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+.prose h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.prose p {
+  margin-bottom: 1.25em;
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.25em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  margin-bottom: 0.25em;
+}
+
+.prose ul li {
+  list-style-type: disc;
+}
+
+.prose ol li {
+  list-style-type: decimal;
+}
+
+.prose pre {
+  margin: 1.5em 0;
+  padding: 1em;
+  border-radius: 0.5rem;
+  background-color: var(--color-bg-alt);
+  overflow-x: auto;
+  font-size: 0.875rem;
+}
+
+.prose code:not(pre code) {
+  padding: 0.15em 0.35em;
+  border-radius: 0.25rem;
+  background-color: var(--color-bg-alt);
+}
+
+.prose blockquote {
+  margin: 1.5em 0;
+  padding-left: 1em;
+  border-left: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.prose img {
+  margin: 1.5em 0;
+  border-radius: 0.5rem;
+}
+
+.prose hr {
+  margin: 2em 0;
+  border-color: var(--color-border);
+}
