@@ -6,7 +6,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .slice(0, 5);
 ---
 
-<section class="mx-auto max-w-3xl px-6 pb-20">
+<section class="reveal mx-auto max-w-3xl px-6 pb-20">
   <div class="flex items-baseline justify-between mb-6">
     <h2 class="text-xl font-semibold">Writing</h2>
     {posts.length > 0 && (
