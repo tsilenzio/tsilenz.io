@@ -6,7 +6,16 @@ const socials = [
 ---
 
 <section class="mx-auto max-w-3xl px-6 pt-24 pb-16">
-  <div class="flex items-start gap-6">
+  <div class="flex items-start gap-8">
+    <div class="hidden sm:block animate-fade-in shrink-0" style="animation-delay: 100ms">
+      <img
+        src="/images/me.jpg"
+        alt="Taylor Silenzio"
+        width="160"
+        height="160"
+        class="size-40 rounded-full border border-(--color-border) object-cover"
+      />
+    </div>
     <div class="flex-1">
       <h1 class="text-4xl font-bold tracking-tight animate-fade-in">Taylor Silenzio</h1>
       <p
@@ -42,13 +51,6 @@ const socials = [
             </a>
           ))
         }
-      </div>
-    </div>
-    <div class="hidden sm:block animate-fade-in" style="animation-delay: 100ms">
-      <div
-        class="size-28 rounded-full bg-(--color-bg-alt) border border-(--color-border) flex items-center justify-center text-(--color-text-muted) text-sm"
-      >
-        Photo
       </div>
     </div>
   </div>
