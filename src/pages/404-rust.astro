@@ -1,0 +1,25 @@
+---
+import Base from '@layouts/Base.astro';
+
+const path = '/the-page-you-wanted';
+const carets = '^'.repeat(path.length);
+---
+
+<Base title="404 (rust) — Taylor Silenzio">
+  <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
+    <pre class="font-mono text-sm leading-6 overflow-x-auto whitespace-pre text-(--color-text)"><span class="font-semibold text-red-400">error[E0404]</span>: cannot find page <span class="text-red-400">`{path}`</span> in site `tsilenz.io`
+ <span class="font-semibold text-(--color-accent)">{'-->'}</span> tsilenz.io{path}
+  <span class="font-semibold text-(--color-accent)">|</span>
+<span class="font-semibold text-(--color-accent)">1 |</span>     GET {path}
+  <span class="font-semibold text-(--color-accent)">|</span>         <span class="font-semibold text-red-400">{carets}</span> <span class="text-red-400">not found in this site</span>
+  <span class="font-semibold text-(--color-accent)">|</span>
+  <span class="font-semibold text-(--color-accent)">=</span> <span class="font-semibold">help</span>: try one of these instead:
+          <a href="/" class="hover:underline">/</a>
+          <a href="/blog" class="hover:underline">/blog</a>
+          <a href="/#projects" class="hover:underline">/#projects</a>
+
+<span class="font-semibold text-red-400">error</span>: aborting due to previous error
+
+For more information about this error, try <a href="/" class="hover:underline">`go home`</a>.</pre>
+  </div>
+</Base>

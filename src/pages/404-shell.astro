@@ -1,0 +1,20 @@
+---
+import Base from '@layouts/Base.astro';
+
+const path = '/the-page-you-wanted';
+---
+
+<Base title="404 (shell) — Taylor Silenzio">
+  <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
+    <pre class="font-mono text-sm leading-6 overflow-x-auto whitespace-pre text-(--color-text)"><span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io{path}
+HTTP/2 <span class="text-red-400">404</span>
+
+<span class="text-(--color-text-muted)"># these work though:</span>
+<span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io<a href="/" class="hover:underline">/</a>
+HTTP/2 <span class="text-green-400">200</span>
+<span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io<a href="/blog" class="hover:underline">/blog</a>
+HTTP/2 <span class="text-green-400">200</span>
+<span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io<a href="/#projects" class="hover:underline">/#projects</a>
+HTTP/2 <span class="text-green-400">200</span></pre>
+  </div>
+</Base>
