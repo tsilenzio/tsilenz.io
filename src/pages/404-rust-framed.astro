@@ -12,11 +12,11 @@ const carets = '^'.repeat(path.length);
         $ cargo build
       </div>
       <div class="overflow-x-auto p-6">
-        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="font-semibold text-red-400">error[E0404]</span>: cannot find page <span class="text-red-400">`{path}`</span> in site `tsilenz.io`
- <span class="font-semibold text-(--color-accent)">{'-->'}</span> tsilenz.io{path}
+        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="font-semibold text-red-400">error[E0404]</span>: cannot find page <span class="text-red-400">`<span data-path>{path}</span>`</span> in site `tsilenz.io`
+ <span class="font-semibold text-(--color-accent)">{'-->'}</span> tsilenz.io<span data-path>{path}</span>
   <span class="font-semibold text-(--color-accent)">|</span>
-<span class="font-semibold text-(--color-accent)">1 |</span>     GET {path}
-  <span class="font-semibold text-(--color-accent)">|</span>         <span class="font-semibold text-red-400">{carets}</span> <span class="text-red-400">not found in this site</span>
+<span class="font-semibold text-(--color-accent)">1 |</span>     GET <span data-path>{path}</span>
+  <span class="font-semibold text-(--color-accent)">|</span>         <span class="font-semibold text-red-400" data-carets>{carets}</span> <span class="text-red-400">not found in this site</span>
   <span class="font-semibold text-(--color-accent)">|</span>
   <span class="font-semibold text-(--color-accent)">=</span> <span class="font-semibold">help</span>: try one of these instead:
           <a href="/" class="hit-wide hover:underline">/</a>
@@ -29,4 +29,16 @@ For more information about this error, try <a href="/" class="hit hover:underlin
       </div>
     </div>
   </div>
+  <script is:inline>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var p = params.get('path') || window.location.pathname;
+      document.querySelectorAll('[data-path]').forEach(function (el) {
+        el.textContent = p;
+      });
+      document.querySelectorAll('[data-carets]').forEach(function (el) {
+        el.textContent = '^'.repeat(p.length);
+      });
+    })();
+  </script>
 </Base>
