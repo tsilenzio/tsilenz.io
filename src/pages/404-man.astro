@@ -2,19 +2,24 @@
 import Base from '@layouts/Base.astro';
 
 const path = '/the-page-you-wanted';
+const hostname = 'tsilenz.io';
 const today = '2026-04-22';
 ---
 
 <Base title="404 (man) — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
-    <div class="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-bg-alt) p-6">
-      <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)">NOTFOUND(4)                  Site Manual                  NOTFOUND(4)
+    <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
+      <div class="border-b border-(--color-border) px-4 py-2 font-mono text-xs text-(--color-text-muted)">
+        $ man notfound
+      </div>
+      <div class="overflow-x-auto p-6">
+        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)">NOTFOUND(4)                  Site Manual                  NOTFOUND(4)
 
 <span class="font-semibold">NAME</span>
-       {path} - page that does not exist
+       <span data-url>{hostname}{path}</span> - page that does not exist
 
 <span class="font-semibold">SYNOPSIS</span>
-       GET {path}
+       GET <span data-path>{path}</span>
 
 <span class="font-semibold">DESCRIPTION</span>
        The requested URL does not correspond to any resource on
@@ -25,9 +30,111 @@ const today = '2026-04-22';
        404    Not Found
 
 <span class="font-semibold">SEE ALSO</span>
-       <a href="/" class="hover:underline">home(1)</a>, <a href="/blog" class="hover:underline">blog(1)</a>, <a href="/#projects" class="hover:underline">projects(1)</a>
+       <span data-see-also><a href="/" class="hover:underline">home(1)</a>, <a href="/blog" class="hover:underline">blog(1)</a></span>
 
-tsilenz.io                    {today}                  NOTFOUND(4)</pre>
+<span data-footer>{hostname}                    {today}                  NOTFOUND(4)</span></pre>
+      </div>
     </div>
   </div>
+  <script is:inline>
+    (function () {
+      function stripWww(host) {
+        return host.indexOf('www.') === 0 ? host.slice(4) : host;
+      }
+      function normalizeHost(host) {
+        var stripped = stripWww(host);
+        if (stripped === 'localhost' || stripped === '127.0.0.1' || stripped === '0.0.0.0' || stripped === '[::1]') {
+          return 'tsilenz.io';
+        }
+        return stripped;
+      }
+
+      var params = new URLSearchParams(window.location.search);
+      var path = params.get('path') || window.location.pathname;
+      var rawHost = params.get('hostname') || window.location.hostname;
+      var hostname = normalizeHost(rawHost);
+      var url = hostname + path;
+      var isMainSite = hostname === 'tsilenz.io';
+
+      document.querySelectorAll('[data-path]').forEach(function (el) {
+        el.textContent = path;
+      });
+      document.querySelectorAll('[data-url]').forEach(function (el) {
+        el.textContent = url;
+      });
+
+      var footerEl = document.querySelector('[data-footer]');
+      if (footerEl) {
+        var date = '2026-04-22';
+        var right = 'NOTFOUND(4)';
+        var width = 70;
+        var gaps = width - hostname.length - date.length - right.length;
+        if (gaps < 2) gaps = 2;
+        var gap1 = ' '.repeat(Math.floor(gaps / 2));
+        var gap2 = ' '.repeat(gaps - Math.floor(gaps / 2));
+        footerEl.textContent = hostname + gap1 + date + gap2 + right;
+      }
+
+      var seeAlsoEl = document.querySelector('[data-see-also]');
+      if (!seeAlsoEl) return;
+
+      while (seeAlsoEl.firstChild) seeAlsoEl.removeChild(seeAlsoEl.firstChild);
+
+      var entries = [];
+
+      if (isMainSite) {
+        [
+          { href: '/', label: 'home(1)' },
+          { href: '/blog', label: 'blog(1)' },
+          { href: '/#projects', label: 'projects(1)' },
+        ].forEach(function (p) {
+          var a = document.createElement('a');
+          a.href = p.href;
+          a.textContent = p.label;
+          a.className = 'hover:underline';
+          entries.push(a);
+        });
+      } else {
+        var backLink = document.createElement('a');
+        backLink.href = '#';
+        backLink.textContent = 'back(1)';
+        backLink.className = 'hover:underline';
+        backLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.location.href = 'https://tsilenz.io/';
+          }
+        });
+        entries.push(backLink);
+
+        var ref = document.referrer;
+        if (ref) {
+          try {
+            var refUrl = new URL(ref);
+            var refHost = stripWww(refUrl.hostname);
+            if (refHost && refHost !== hostname) {
+              var refLink = document.createElement('a');
+              refLink.href = ref;
+              refLink.textContent = refHost + '(1)';
+              refLink.className = 'hover:underline';
+              entries.push(refLink);
+            }
+          } catch (e) {}
+        }
+
+        var homeLink = document.createElement('a');
+        homeLink.href = 'https://tsilenz.io/';
+        homeLink.textContent = 'tsilenz.io(1)';
+        homeLink.className = 'hover:underline';
+        entries.push(homeLink);
+      }
+
+      entries.forEach(function (el, i) {
+        if (i > 0) seeAlsoEl.appendChild(document.createTextNode(', '));
+        seeAlsoEl.appendChild(el);
+      });
+    })();
+  </script>
 </Base>
