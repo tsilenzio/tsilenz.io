@@ -14,12 +14,49 @@ const carets = '^'.repeat(path.length);
   <span class="font-semibold text-(--color-accent)">|</span>         <span class="font-semibold text-red-400">{carets}</span> <span class="text-red-400">not found in this site</span>
   <span class="font-semibold text-(--color-accent)">|</span>
   <span class="font-semibold text-(--color-accent)">=</span> <span class="font-semibold">help</span>: try one of these instead:
-          <a href="/" class="hover:underline">/</a>
-          <a href="/blog" class="hover:underline">/blog</a>
-          <a href="/#projects" class="hover:underline">/#projects</a>
+          <a href="/" class="hit-wide hover:underline">/</a>
+          <a href="/blog" class="hit-wide hover:underline">/blog</a>
+          <a href="/#projects" class="hit-wide hover:underline">/#projects</a>
 
 <span class="font-semibold text-red-400">error</span>: aborting due to previous error
 
-For more information about this error, try <a href="/" class="hover:underline">`go home`</a>.</pre>
+For more information about this error, try <a href="/" class="hit hover:underline">`go home`</a>.</pre>
   </div>
+  <style is:global>
+    .hit,
+    .hit-wide {
+      position: relative;
+      isolation: isolate;
+      transition: color 0.12s ease;
+    }
+    .hit::before,
+    .hit-wide::before {
+      content: '';
+      position: absolute;
+      top: -0.3rem;
+      bottom: -0.3rem;
+      border-radius: 0.25rem;
+      z-index: -1;
+      transition: background 0.12s ease;
+    }
+    .hit::before {
+      left: -0.5rem;
+      right: -0.5rem;
+    }
+    .hit-wide::before {
+      left: -0.5rem;
+      width: 13ch;
+    }
+    .hit:hover,
+    .hit-wide:hover {
+      color: var(--color-accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+    }
+    .hit:hover::before,
+    .hit-wide:hover::before {
+      background: var(--color-accent-muted);
+    }
+  </style>
 </Base>
