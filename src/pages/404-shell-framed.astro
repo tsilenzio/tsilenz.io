@@ -4,10 +4,14 @@ import Base from '@layouts/Base.astro';
 const path = '/the-page-you-wanted';
 ---
 
-<Base title="404 (shell) — Taylor Silenzio">
+<Base title="404 (shell, framed) — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
-    <div class="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-bg-alt) p-6">
-      <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io{path}
+    <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
+      <div class="border-b border-(--color-border) px-4 py-2 font-mono text-xs text-(--color-text-muted)">
+        ~/tsilenz.io — zsh
+      </div>
+      <div class="overflow-x-auto p-6">
+        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io{path}
 HTTP/2 <span class="text-red-400">404</span>
 
 <span class="text-(--color-text-muted)"># these work though:</span>
@@ -17,6 +21,7 @@ HTTP/2 <span class="text-green-400">200</span>
 HTTP/2 <span class="text-green-400">200</span>
 <span class="text-(--color-accent)">$</span> curl -sI https://tsilenz.io<a href="/#projects" class="hover:underline">/#projects</a>
 HTTP/2 <span class="text-green-400">200</span></pre>
+      </div>
     </div>
   </div>
 </Base>

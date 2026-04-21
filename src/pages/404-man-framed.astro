@@ -5,10 +5,14 @@ const path = '/the-page-you-wanted';
 const today = '2026-04-22';
 ---
 
-<Base title="404 (man) — Taylor Silenzio">
+<Base title="404 (man, framed) — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
-    <div class="overflow-x-auto rounded-lg border border-(--color-border) bg-(--color-bg-alt) p-6">
-      <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)">NOTFOUND(4)                  Site Manual                  NOTFOUND(4)
+    <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
+      <div class="border-b border-(--color-border) px-4 py-2 font-mono text-xs text-(--color-text-muted)">
+        $ man notfound
+      </div>
+      <div class="overflow-x-auto p-6">
+        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)">NOTFOUND(4)                  Site Manual                  NOTFOUND(4)
 
 <span class="font-semibold">NAME</span>
        {path} - page that does not exist
@@ -28,6 +32,7 @@ const today = '2026-04-22';
        <a href="/" class="hover:underline">home(1)</a>, <a href="/blog" class="hover:underline">blog(1)</a>, <a href="/#projects" class="hover:underline">projects(1)</a>
 
 tsilenz.io                    {today}                  NOTFOUND(4)</pre>
+      </div>
     </div>
   </div>
 </Base>

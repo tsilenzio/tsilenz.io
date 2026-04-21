@@ -2,9 +2,12 @@
 import Base from '@layouts/Base.astro';
 
 const variants = [
-  { href: '/404-rust', name: 'rust compiler error' },
-  { href: '/404-man', name: 'unix man page' },
-  { href: '/404-shell', name: 'shell session' },
+  { href: '/404-rust', name: 'rust compiler error (light)' },
+  { href: '/404-rust-framed', name: 'rust compiler error (framed)' },
+  { href: '/404-man', name: 'unix man page (light)' },
+  { href: '/404-man-framed', name: 'unix man page (framed)' },
+  { href: '/404-shell', name: 'shell session (light)' },
+  { href: '/404-shell-framed', name: 'shell session (framed)' },
   { href: '/404-oneliner', name: 'dry one-liner' },
 ];
 ---
@@ -12,7 +15,7 @@ const variants = [
 <Base title="404 previews — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-24 pb-20">
     <h1 class="text-2xl font-bold">404 previews</h1>
-    <p class="mt-2 text-(--color-text-muted)">Four variants to try on for size.</p>
+    <p class="mt-2 text-(--color-text-muted)">Variants to try on for size.</p>
     <ul class="mt-6 space-y-3">
       {
         variants.map(({ href, name }) => (
