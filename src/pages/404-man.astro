@@ -30,12 +30,39 @@ const today = '2026-04-22';
        404    Not Found
 
 <span class="font-semibold">SEE ALSO</span>
-       <span data-see-also><a href="/" class="hover:underline">home(1)</a>, <a href="/blog" class="hover:underline">blog(1)</a></span>
+       <span data-see-also><a href="/" class="man-link hover:underline">home(1)</a>, <a href="/blog" class="man-link hover:underline">blog(1)</a></span>
 
 <span data-footer>{hostname}                    {today}                  NOTFOUND(4)</span></pre>
       </div>
     </div>
   </div>
+  <style is:global>
+    .man-link {
+      position: relative;
+      isolation: isolate;
+      transition: color 0.12s ease;
+    }
+    .man-link::before {
+      content: '';
+      position: absolute;
+      top: -0.3rem;
+      bottom: -0.3rem;
+      left: -0.5rem;
+      right: -0.5rem;
+      border-radius: 0.25rem;
+      z-index: -1;
+      transition: background 0.12s ease;
+    }
+    .man-link:hover {
+      color: var(--color-accent);
+      text-decoration: underline;
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 4px;
+    }
+    .man-link:hover::before {
+      background: var(--color-accent-muted);
+    }
+  </style>
   <script is:inline>
     (function () {
       function stripWww(host) {
@@ -91,14 +118,14 @@ const today = '2026-04-22';
           var a = document.createElement('a');
           a.href = p.href;
           a.textContent = p.label;
-          a.className = 'hover:underline';
+          a.className = 'man-link hover:underline';
           entries.push(a);
         });
       } else {
         var backLink = document.createElement('a');
         backLink.href = '#';
         backLink.textContent = 'back(1)';
-        backLink.className = 'hover:underline';
+        backLink.className = 'man-link hover:underline';
         backLink.addEventListener('click', function (e) {
           e.preventDefault();
           if (window.history.length > 1) {
@@ -118,7 +145,7 @@ const today = '2026-04-22';
               var refLink = document.createElement('a');
               refLink.href = ref;
               refLink.textContent = refHost + '(1)';
-              refLink.className = 'hover:underline';
+              refLink.className = 'man-link hover:underline';
               entries.push(refLink);
             }
           } catch (e) {}
@@ -127,7 +154,7 @@ const today = '2026-04-22';
         var homeLink = document.createElement('a');
         homeLink.href = 'https://tsilenz.io/';
         homeLink.textContent = 'tsilenz.io(1)';
-        homeLink.className = 'hover:underline';
+        homeLink.className = 'man-link hover:underline';
         entries.push(homeLink);
       }
 
