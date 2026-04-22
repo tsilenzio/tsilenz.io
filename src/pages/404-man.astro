@@ -117,11 +117,29 @@ const today = '2026-04-22';
       var url = hostname + path;
       var isMainSite = hostname === 'tsilenz.io';
 
+      var MARKER = '[..]';
+      function truncateMiddle(s, max) {
+        if (s.length <= max) return s;
+        var keep = max - MARKER.length;
+        var left = Math.ceil(keep / 2);
+        var right = Math.floor(keep / 2);
+        return s.slice(0, left) + MARKER + s.slice(s.length - right);
+      }
+
+      var maxPath = Math.max(16, 46 - hostname.length);
+      var displayPath = truncateMiddle(path, maxPath);
+      var truncated = displayPath !== path;
+      var displayUrl = hostname + displayPath;
+
       document.querySelectorAll('[data-path]').forEach(function (el) {
-        el.textContent = path;
+        el.textContent = displayPath;
+        if (truncated) el.setAttribute('title', path);
+        else el.removeAttribute('title');
       });
       document.querySelectorAll('[data-url]').forEach(function (el) {
-        el.textContent = url;
+        el.textContent = displayUrl;
+        if (truncated) el.setAttribute('title', url);
+        else el.removeAttribute('title');
       });
 
       var footerEl = document.querySelector('[data-footer]');
