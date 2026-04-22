@@ -30,7 +30,7 @@ const today = '2026-04-22';
        404    Not Found
 
 <span class="font-semibold">SEE ALSO</span>
-       <span data-see-also><a href="/" class="man-link hover:underline">home(1)</a>, <a href="/blog" class="man-link hover:underline">blog(1)</a></span>
+       <span class="pill-group"><span class="pill" aria-hidden="true"></span><span data-see-also><a href="/" class="man-link hover:underline">home(1)</a>, <a href="/blog" class="man-link hover:underline">blog(1)</a></span></span>
 
 <span data-footer>{hostname}                    {today}                  NOTFOUND(4)</span></pre>
       </div>
@@ -61,6 +61,40 @@ const today = '2026-04-22';
     }
     .man-link:hover::before {
       background: var(--color-accent-muted);
+    }
+    .pill-group {
+      position: relative;
+      isolation: isolate;
+    }
+    .pill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      background: var(--color-accent-muted);
+      border-radius: 0.25rem;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0;
+      transform: translate(0, 0);
+      transition:
+        transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        width 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        height 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 120ms ease;
+      will-change: transform, width, height;
+    }
+    .pill[data-active='true'] {
+      opacity: 1;
+    }
+    .pill-group[data-magic='active'] .man-link:hover::before {
+      background: transparent;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .pill {
+        transition: opacity 80ms ease;
+      }
     }
   </style>
   <script is:inline>
@@ -161,6 +195,70 @@ const today = '2026-04-22';
       entries.forEach(function (el, i) {
         if (i > 0) seeAlsoEl.appendChild(document.createTextNode(', '));
         seeAlsoEl.appendChild(el);
+      });
+
+      document.querySelectorAll('.pill-group').forEach(function (group) {
+        var pill = group.querySelector('.pill');
+        if (!pill) return;
+
+        var links = group.querySelectorAll('.man-link');
+        if (links.length === 0) return;
+
+        group.dataset.magic = 'active';
+
+        var visible = false;
+        var leaveTimer = null;
+
+        function setPill(target, skipSlide) {
+          if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+
+          var targetRect = target.getBoundingClientRect();
+          var groupRect = group.getBoundingClientRect();
+          var extendX = 8;
+          var extendY = 5;
+          var top = targetRect.top - groupRect.top - extendY;
+          var left = targetRect.left - groupRect.left - extendX;
+          var width = targetRect.width + extendX * 2;
+          var height = targetRect.height + extendY * 2;
+
+          if (skipSlide) {
+            pill.style.transition = 'opacity 120ms ease';
+          } else {
+            pill.style.transition = '';
+          }
+
+          pill.style.transform = 'translate(' + left + 'px, ' + top + 'px)';
+          pill.style.width = width + 'px';
+          pill.style.height = height + 'px';
+          pill.setAttribute('data-active', 'true');
+          visible = true;
+        }
+
+        function hidePill() {
+          pill.removeAttribute('data-active');
+          visible = false;
+        }
+
+        links.forEach(function (link) {
+          link.addEventListener('mouseenter', function () {
+            setPill(link, !visible);
+          });
+          link.addEventListener('focus', function () {
+            setPill(link, !visible);
+          });
+        });
+
+        group.addEventListener('mouseleave', function () {
+          if (leaveTimer) clearTimeout(leaveTimer);
+          leaveTimer = setTimeout(hidePill, 60);
+        });
+
+        group.addEventListener('focusout', function (e) {
+          if (!group.contains(e.relatedTarget)) {
+            if (leaveTimer) clearTimeout(leaveTimer);
+            leaveTimer = setTimeout(hidePill, 60);
+          }
+        });
       });
     })();
   </script>
