@@ -1,0 +1,54 @@
+name: Conventions
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  commits:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cocogitto/cocogitto-action@v3
+        with:
+          check-latest-tag-only: false
+
+  branch-name:
+    name: Branch name
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Validate branch follows <type>/<desc>
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          echo "Branch: $BRANCH"
+          if [[ ! "$BRANCH" =~ ^(feat|fix|refactor|docs|ci|chore|test|perf|build|style|revert)/[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "Error: Branch name must follow <type>/<short-description>"
+            echo "Valid types: feat, fix, refactor, docs, ci, chore, test, perf, build, style, revert"
+            exit 1
+          fi
+
+  pr-format:
+    name: PR format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR body has Summary and Test plan sections
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [[ -z "$PR_BODY" ]]; then
+            echo "Error: PR body is empty"
+            exit 1
+          fi
+          if ! echo "$PR_BODY" | grep -qE '^## Summary'; then
+            echo "Error: PR body must contain a '## Summary' section"
+            exit 1
+          fi
+          if ! echo "$PR_BODY" | grep -qE '^## Test plan'; then
+            echo "Error: PR body must contain a '## Test plan' section"
+            exit 1
+          fi
