@@ -1,3 +1,11 @@
+export {};
+
+declare global {
+  interface Window {
+    __toggleTheme?: () => void;
+  }
+}
+
 const STORAGE_KEY = 'theme';
 const TS_KEY = 'theme_ts';
 const WINDOW_MS = 30 * 60 * 1000;
@@ -75,6 +83,6 @@ function init(): void {
   });
 }
 
-(window as any).__toggleTheme = toggle;
+window.__toggleTheme = toggle;
 
 init();

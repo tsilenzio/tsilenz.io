@@ -7,7 +7,7 @@ const observer = new IntersectionObserver(
       }
     }
   },
-  { rootMargin: '0px 0px -10% 0px', threshold: 0.1 }
+  { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
 );
 
 document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));

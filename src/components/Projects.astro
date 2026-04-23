@@ -52,7 +52,8 @@ const projects = [
   },
   {
     title: 'rune-keychain',
-    description: 'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
+    description:
+      'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
     status: 'On Hold' as const,
     tech: ['Rust', 'CLI'],
     href: 'https://github.com/tsilenzio/rune-keychain',
@@ -71,10 +72,6 @@ const projects = [
 <section id="projects" class="reveal mx-auto max-w-3xl px-6 pb-20">
   <h2 class="mb-6 text-xl font-semibold">Projects</h2>
   <div class="grid gap-4 sm:grid-cols-2">
-    {
-      projects.map((project) => (
-        <ProjectCard {...project} />
-      ))
-    }
+    {projects.map((project) => <ProjectCard {...project} />)}
   </div>
 </section>

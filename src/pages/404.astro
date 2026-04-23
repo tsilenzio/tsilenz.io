@@ -10,18 +10,21 @@ const placeholderHost = 'tsilenz.io';
 <Base title="404 — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
     <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
-      <div class="border-b border-(--color-border) px-4 py-2 font-mono text-xs text-(--color-text-muted)">
+      <div
+        class="border-b border-(--color-border) px-4 py-2 font-mono text-xs text-(--color-text-muted)"
+      >
         $ cargo build
       </div>
       <div class="overflow-x-auto p-6">
-        <pre class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="font-semibold text-red-400" data-rust-code>error[E0404]</span>: <span data-error-phrase>cannot find page</span> <span class="text-red-400">`<span data-path>{placeholderPath}</span>`</span> in site `<span data-site-host>{placeholderHost}</span>`
+        <pre
+          class="font-mono text-sm leading-6 whitespace-pre text-(--color-text)"><span class="font-semibold text-red-400" data-rust-code>error[E0404]</span>: <span data-error-phrase>cannot find page</span> <span class="text-red-400">`<span data-path>{placeholderPath}</span>`</span> in site `<span data-site-host>{placeholderHost}</span>`
  <span class="font-semibold text-(--color-accent)">{'-->'}</span> <span data-site-host>{placeholderHost}</span><span data-path>{placeholderPath}</span>
   <span class="font-semibold text-(--color-accent)">|</span>
 <span class="font-semibold text-(--color-accent)">1 |</span>     GET <span data-path>{placeholderPath}</span>
   <span class="font-semibold text-(--color-accent)">|</span>         <span class="font-semibold text-red-400" data-carets>{placeholderCarets}</span> <span class="text-red-400" data-trail-label>not found in this site</span>
   <span class="font-semibold text-(--color-accent)">|</span>
   <span class="font-semibold text-(--color-accent)">=</span> <span class="font-semibold">help</span>: try one of these instead:
-<span class="pill-group"><span class="pill" aria-hidden="true"></span>          <a href="/" class="hit-wide hover:underline">/</a>
+<span class="pill-group"><span class="pill" aria-hidden="true" />          <a href="/" class="hit-wide hover:underline">/</a>
           <a href="/blog" class="hit-wide hover:underline">/blog</a>
           <a href="/#projects" class="hit-wide hover:underline">/#projects</a></span>
 
@@ -76,7 +79,9 @@ For more information about this error, try <a href="/" class="hit hover:underlin
 
     render(realPath);
 
-    (window as unknown as { __tsilenz404: { render: typeof render; getRealPath: () => string } }).__tsilenz404 = {
+    (
+      window as unknown as { __tsilenz404: { render: typeof render; getRealPath: () => string } }
+    ).__tsilenz404 = {
       render,
       getRealPath: () => realPath,
     };

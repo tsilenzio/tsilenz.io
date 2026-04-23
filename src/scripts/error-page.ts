@@ -187,7 +187,12 @@ export function measureContainerChars(container: HTMLElement): number {
   return Math.max(1, Math.floor(contentWidth / charWidth));
 }
 
-export function buildAlignedLine(width: number, left: string, center: string, right: string): string {
+export function buildAlignedLine(
+  width: number,
+  left: string,
+  center: string,
+  right: string,
+): string {
   const contentLen = left.length + center.length + right.length;
   let gaps = width - contentLen;
   if (gaps < 2) gaps = 2;
