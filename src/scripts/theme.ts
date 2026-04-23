@@ -1,18 +1,35 @@
 const STORAGE_KEY = 'theme';
+const TS_KEY = 'theme_ts';
+const WINDOW_MS = 30 * 60 * 1000;
 
 type Theme = 'dark' | 'light';
+
+function now(): number {
+  return Date.now();
+}
 
 function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
-function getStoredTheme(): Theme | null {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'dark' || stored === 'light') return stored;
-  return null;
+function readStored(): Theme | null {
+  const theme = localStorage.getItem(STORAGE_KEY);
+  const tsStr = localStorage.getItem(TS_KEY);
+  const ts = tsStr ? parseInt(tsStr, 10) : 0;
+  if (theme !== 'dark' && theme !== 'light') return null;
+  if (!ts || now() - ts > WINDOW_MS) {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(TS_KEY);
+    return null;
+  }
+  return theme;
 }
 
-function applyTheme(theme: Theme) {
+function currentTheme(): Theme {
+  return readStored() ?? getSystemTheme();
+}
+
+function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.toggle('light', theme === 'light');
 
@@ -22,22 +39,40 @@ function applyTheme(theme: Theme) {
   }
 }
 
-function init() {
-  const theme = getStoredTheme() ?? getSystemTheme();
-  applyTheme(theme);
-
-  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-    if (!getStoredTheme()) {
-      applyTheme(getSystemTheme());
-    }
-  });
+function refreshTs(): void {
+  if (localStorage.getItem(STORAGE_KEY)) {
+    localStorage.setItem(TS_KEY, String(now()));
+  }
 }
 
-function toggle() {
-  const current = document.documentElement.classList.contains('light') ? 'light' : 'dark';
-  const next: Theme = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem(STORAGE_KEY, next);
-  applyTheme(next);
+function setTheme(theme: Theme): void {
+  localStorage.setItem(STORAGE_KEY, theme);
+  localStorage.setItem(TS_KEY, String(now()));
+  applyTheme(theme);
+}
+
+function toggle(): void {
+  const current: Theme = document.documentElement.classList.contains('light') ? 'light' : 'dark';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+function init(): void {
+  applyTheme(currentTheme());
+  refreshTs();
+
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+    if (!readStored()) applyTheme(getSystemTheme());
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshTs();
+  });
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === STORAGE_KEY || e.key === TS_KEY || e.key === null) {
+      applyTheme(currentTheme());
+    }
+  });
 }
 
 (window as any).__toggleTheme = toggle;

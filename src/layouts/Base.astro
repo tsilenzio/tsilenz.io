@@ -43,9 +43,18 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     {/* Inline theme init to prevent FOUC */}
     <script is:inline>
       (function () {
-        var stored = localStorage.getItem('theme');
+        var WINDOW_MS = 30 * 60 * 1000;
+        var theme = localStorage.getItem('theme');
+        var tsStr = localStorage.getItem('theme_ts');
+        var ts = tsStr ? parseInt(tsStr, 10) : 0;
+        var valid = (theme === 'light' || theme === 'dark') && ts && Date.now() - ts <= WINDOW_MS;
+        if (!valid && (theme || tsStr)) {
+          localStorage.removeItem('theme');
+          localStorage.removeItem('theme_ts');
+        }
         var preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-        if (stored === 'light' || (!stored && preferLight)) {
+        var applyLight = valid ? theme === 'light' : preferLight;
+        if (applyLight) {
           document.documentElement.classList.add('light');
         }
       })();
