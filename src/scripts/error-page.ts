@@ -25,11 +25,80 @@ export function truncateMiddle(s: string, max: number): string {
   return s.slice(0, left) + MARKER + s.slice(s.length - right);
 }
 
+export interface StatusInfo {
+  status: number;
+  rustCode: string;
+  errorPhrase: string;
+  rustTrailLabel: string;
+  manSubject: string;
+  manNameDesc: string;
+  exitLabel: string;
+}
+
+const STATUS_TABLE: Record<number, Omit<StatusInfo, 'status'>> = {
+  403: {
+    rustCode: 'E0403',
+    errorPhrase: 'access denied for page',
+    rustTrailLabel: 'denied in this site',
+    manSubject: 'FORBIDDEN',
+    manNameDesc: 'access denied',
+    exitLabel: 'Forbidden',
+  },
+  404: {
+    rustCode: 'E0404',
+    errorPhrase: 'cannot find page',
+    rustTrailLabel: 'not found in this site',
+    manSubject: 'NOTFOUND',
+    manNameDesc: 'page that does not exist',
+    exitLabel: 'Not Found',
+  },
+  410: {
+    rustCode: 'E0410',
+    errorPhrase: 'page is gone',
+    rustTrailLabel: 'gone from this site',
+    manSubject: 'GONE',
+    manNameDesc: 'page is no longer available',
+    exitLabel: 'Gone',
+  },
+  500: {
+    rustCode: 'E0500',
+    errorPhrase: 'thread panicked while serving',
+    rustTrailLabel: 'panicked in this site',
+    manSubject: 'PANIC',
+    manNameDesc: 'thread panicked',
+    exitLabel: 'Internal Server Error',
+  },
+  503: {
+    rustCode: 'E0503',
+    errorPhrase: 'service unavailable for',
+    rustTrailLabel: 'unavailable in this site',
+    manSubject: 'UNAVAILABLE',
+    manNameDesc: 'service unavailable',
+    exitLabel: 'Service Unavailable',
+  },
+};
+
+export function getStatusInfo(status: number): StatusInfo {
+  const entry =
+    STATUS_TABLE[status] ??
+    ({
+      rustCode: `E${status}`,
+      errorPhrase: 'error serving page',
+      rustTrailLabel: 'error in this site',
+      manSubject: 'ERROR',
+      manNameDesc: 'error serving page',
+      exitLabel: 'Error',
+    } satisfies Omit<StatusInfo, 'status'>);
+  return { status, ...entry };
+}
+
 export interface PageContext {
   path: string;
   rawHost: string;
   hostname: string;
   url: string;
+  status: number;
+  statusInfo: StatusInfo;
 }
 
 export function getPageContext(): PageContext {
@@ -38,7 +107,9 @@ export function getPageContext(): PageContext {
   const rawHost = params.get('hostname') || window.location.hostname;
   const hostname = normalizeHost(rawHost);
   const url = hostname + path;
-  return { path, rawHost, hostname, url };
+  const statusParam = params.get('status');
+  const status = (statusParam ? parseInt(statusParam, 10) : NaN) || 404;
+  return { path, rawHost, hostname, url, status, statusInfo: getStatusInfo(status) };
 }
 
 export function initMagicPill(group: HTMLElement, linkSelector = '.hit, .hit-wide'): void {
@@ -94,4 +165,33 @@ export function initMagicPill(group: HTMLElement, linkSelector = '.hit, .hit-wid
       leaveTimer = window.setTimeout(hidePill, 60);
     }
   });
+}
+
+export function measureContainerChars(container: HTMLElement): number {
+  const test = document.createElement('span');
+  test.textContent = '0'.repeat(100);
+  test.style.position = 'absolute';
+  test.style.visibility = 'hidden';
+  test.style.whiteSpace = 'pre';
+  const computed = getComputedStyle(container);
+  test.style.fontFamily = computed.fontFamily;
+  test.style.fontSize = computed.fontSize;
+  test.style.fontWeight = computed.fontWeight;
+  container.appendChild(test);
+  const charWidth = test.getBoundingClientRect().width / 100;
+  container.removeChild(test);
+
+  const padLeft = parseFloat(computed.paddingLeft) || 0;
+  const padRight = parseFloat(computed.paddingRight) || 0;
+  const contentWidth = container.clientWidth - padLeft - padRight;
+  return Math.max(1, Math.floor(contentWidth / charWidth));
+}
+
+export function buildAlignedLine(width: number, left: string, center: string, right: string): string {
+  const contentLen = left.length + center.length + right.length;
+  let gaps = width - contentLen;
+  if (gaps < 2) gaps = 2;
+  const gap1 = ' '.repeat(Math.floor(gaps / 2));
+  const gap2 = ' '.repeat(gaps - Math.floor(gaps / 2));
+  return left + gap1 + center + gap2 + right;
 }
