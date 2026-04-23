@@ -1,0 +1,17 @@
+commit-msg:
+  commands:
+    conventional:
+      run: cog verify --file {1}
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: '*.{ts,js,mjs,cjs,astro,md,mdx,css,json,yaml,yml,html}'
+      run: pnpm prettier --write {staged_files}
+      stage_fixed: true
+    lint:
+      glob: '*.{ts,js,mjs,cjs,astro}'
+      run: pnpm eslint {staged_files}
+    typecheck:
+      run: pnpm typecheck

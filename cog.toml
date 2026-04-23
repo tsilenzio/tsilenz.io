@@ -1,0 +1,14 @@
+tag_prefix = "v"
+ignore_merge_commits = true
+branch_whitelist = ["main"]
+
+[commit_types]
+chore = { omit_from_changelog = true }
+test = { omit_from_changelog = true }
+
+[changelog]
+path = "CHANGELOG.md"
+template = "remote"
+remote = "github.com"
+repository = "tsilenz.io"
+owner = "tsilenzio"
