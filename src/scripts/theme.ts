@@ -7,34 +7,20 @@ declare global {
 }
 
 const STORAGE_KEY = 'theme';
-const TS_KEY = 'theme_ts';
-const WINDOW_MS = 30 * 60 * 1000;
 
 type Theme = 'dark' | 'light';
-
-function now(): number {
-  return Date.now();
-}
 
 function getSystemTheme(): Theme {
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
-function readStored(): Theme | null {
+function getStoredTheme(): Theme | null {
   const theme = localStorage.getItem(STORAGE_KEY);
-  const tsStr = localStorage.getItem(TS_KEY);
-  const ts = tsStr ? parseInt(tsStr, 10) : 0;
-  if (theme !== 'dark' && theme !== 'light') return null;
-  if (!ts || now() - ts > WINDOW_MS) {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(TS_KEY);
-    return null;
-  }
-  return theme;
+  return theme === 'dark' || theme === 'light' ? theme : null;
 }
 
 function currentTheme(): Theme {
-  return readStored() ?? getSystemTheme();
+  return getStoredTheme() ?? getSystemTheme();
 }
 
 function applyTheme(theme: Theme): void {
@@ -47,15 +33,8 @@ function applyTheme(theme: Theme): void {
   }
 }
 
-function refreshTs(): void {
-  if (localStorage.getItem(STORAGE_KEY)) {
-    localStorage.setItem(TS_KEY, String(now()));
-  }
-}
-
 function setTheme(theme: Theme): void {
   localStorage.setItem(STORAGE_KEY, theme);
-  localStorage.setItem(TS_KEY, String(now()));
   applyTheme(theme);
 }
 
@@ -66,18 +45,13 @@ function toggle(): void {
 
 function init(): void {
   applyTheme(currentTheme());
-  refreshTs();
 
   window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-    if (!readStored()) applyTheme(getSystemTheme());
-  });
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') refreshTs();
+    if (!getStoredTheme()) applyTheme(getSystemTheme());
   });
 
   window.addEventListener('storage', (e) => {
-    if (e.key === STORAGE_KEY || e.key === TS_KEY || e.key === null) {
+    if (e.key === STORAGE_KEY || e.key === null) {
       applyTheme(currentTheme());
     }
   });
