@@ -1,5 +1,6 @@
 ---
 import Base from '@layouts/Base.astro';
+import '../styles/error.css';
 
 const path = '/the-page-you-wanted';
 const carets = '^'.repeat(path.length);
@@ -29,186 +30,37 @@ For more information about this error, try <a href="/" class="hit hover:underlin
       </div>
     </div>
   </div>
-  <style is:global>
-    .hit,
-    .hit-wide {
-      position: relative;
-      isolation: isolate;
-      transition: color 0.12s ease;
-    }
-    .hit::before,
-    .hit-wide::before {
-      content: '';
-      position: absolute;
-      top: -0.3rem;
-      bottom: -0.3rem;
-      border-radius: 0.25rem;
-      z-index: -1;
-      transition: background 0.12s ease;
-    }
-    .hit::before {
-      left: -0.5rem;
-      right: -0.5rem;
-    }
-    .hit-wide::before {
-      left: -0.5rem;
-      width: 13ch;
-    }
-    .hit:hover,
-    .hit-wide:hover {
-      color: var(--color-accent);
-      text-decoration: underline;
-      text-decoration-thickness: 1px;
-      text-underline-offset: 4px;
-    }
-    .hit:hover::before,
-    .hit-wide:hover::before {
-      background: var(--color-accent-muted);
-    }
-    .pill-group {
-      position: relative;
-      isolation: isolate;
-    }
-    .pill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 0;
-      height: 0;
-      background: var(--color-accent-muted);
-      border-radius: 0.25rem;
-      pointer-events: none;
-      z-index: -1;
-      opacity: 0;
-      transform: translate(0, 0);
-      transition:
-        transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
-        width 180ms cubic-bezier(0.4, 0, 0.2, 1),
-        height 180ms cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 120ms ease;
-      will-change: transform, width, height;
-    }
-    .pill[data-active='true'] {
-      opacity: 1;
-    }
-    .pill-group[data-magic='active'] .hit:hover::before,
-    .pill-group[data-magic='active'] .hit-wide:hover::before {
-      background: transparent;
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .pill {
-        transition: opacity 80ms ease;
-      }
-    }
-  </style>
-  <script is:inline>
-    (function () {
-      var MAX_DISPLAY = 25;
-      var MARKER = '[..]';
+  <script>
+    import { getPageContext, truncateMiddle, initMagicPill } from '@scripts/error-page';
 
-      function truncateMiddle(s, max) {
-        if (s.length <= max) return s;
-        var keep = max - MARKER.length;
-        var left = Math.ceil(keep / 2);
-        var right = Math.floor(keep / 2);
-        return s.slice(0, left) + MARKER + s.slice(s.length - right);
-      }
+    const MAX_DISPLAY = 25;
+    const ctx = getPageContext();
+    let realPath = ctx.path;
 
-      var params = new URLSearchParams(window.location.search);
-      var realPath = params.get('path') || window.location.pathname;
+    function render(path: string): void {
+      realPath = path;
+      const displayPath = truncateMiddle(path, MAX_DISPLAY);
+      const truncated = displayPath !== path;
 
-      function render(path) {
-        realPath = path;
-        var displayPath = truncateMiddle(path, MAX_DISPLAY);
-        var truncated = displayPath !== path;
-
-        document.querySelectorAll('[data-path]').forEach(function (el) {
-          el.textContent = displayPath;
-          if (truncated) {
-            el.setAttribute('title', path);
-          } else {
-            el.removeAttribute('title');
-          }
-        });
-        document.querySelectorAll('[data-carets]').forEach(function (el) {
-          el.textContent = '^'.repeat(displayPath.length);
-        });
-      }
-
-      render(realPath);
-
-      window.__tsilenz404 = {
-        render: render,
-        getRealPath: function () { return realPath; },
-      };
-    })();
-  </script>
-  <script is:inline>
-    (function () {
-      var groups = document.querySelectorAll('.pill-group');
-      groups.forEach(function (group) {
-        var pill = group.querySelector('.pill');
-        if (!pill) return;
-
-        var links = group.querySelectorAll('.hit, .hit-wide');
-        if (links.length === 0) return;
-
-        group.dataset.magic = 'active';
-
-        var visible = false;
-        var leaveTimer = null;
-
-        function setPill(target, skipSlide) {
-          if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
-
-          var targetRect = target.getBoundingClientRect();
-          var groupRect = group.getBoundingClientRect();
-          var extendX = 8;
-          var extendY = 5;
-          var top = targetRect.top - groupRect.top - extendY;
-          var left = targetRect.left - groupRect.left - extendX;
-          var width = targetRect.width + extendX * 2;
-          var height = targetRect.height + extendY * 2;
-
-          if (skipSlide) {
-            pill.style.transition = 'opacity 120ms ease';
-          } else {
-            pill.style.transition = '';
-          }
-
-          pill.style.transform = 'translate(' + left + 'px, ' + top + 'px)';
-          pill.style.width = width + 'px';
-          pill.style.height = height + 'px';
-          pill.setAttribute('data-active', 'true');
-          visible = true;
-        }
-
-        function hidePill() {
-          pill.removeAttribute('data-active');
-          visible = false;
-        }
-
-        links.forEach(function (link) {
-          link.addEventListener('mouseenter', function () {
-            setPill(link, !visible);
-          });
-          link.addEventListener('focus', function () {
-            setPill(link, !visible);
-          });
-        });
-
-        group.addEventListener('mouseleave', function () {
-          if (leaveTimer) clearTimeout(leaveTimer);
-          leaveTimer = setTimeout(hidePill, 60);
-        });
-
-        group.addEventListener('focusout', function (e) {
-          if (!group.contains(e.relatedTarget)) {
-            if (leaveTimer) clearTimeout(leaveTimer);
-            leaveTimer = setTimeout(hidePill, 60);
-          }
-        });
+      document.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+        el.textContent = displayPath;
+        if (truncated) el.setAttribute('title', path);
+        else el.removeAttribute('title');
       });
-    })();
+      document.querySelectorAll<HTMLElement>('[data-carets]').forEach((el) => {
+        el.textContent = '^'.repeat(displayPath.length);
+      });
+    }
+
+    render(realPath);
+
+    (window as unknown as { __tsilenz404: { render: typeof render; getRealPath: () => string } }).__tsilenz404 = {
+      render,
+      getRealPath: () => realPath,
+    };
+
+    document.querySelectorAll<HTMLElement>('.pill-group').forEach((group) => {
+      initMagicPill(group);
+    });
   </script>
 </Base>
