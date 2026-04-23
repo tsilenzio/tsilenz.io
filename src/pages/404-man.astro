@@ -4,7 +4,7 @@ import '../styles/error.css';
 
 const placeholderPath = '/the-page-you-wanted';
 const placeholderHost = 'tsilenz.io';
-const today = '2026-04-22';
+const placeholderDate = new Date().toISOString().slice(0, 10);
 ---
 
 <Base title="404 (man) — Taylor Silenzio">
@@ -37,7 +37,7 @@ const today = '2026-04-22';
 <span class="font-semibold">SEE ALSO</span>
        <span class="pill-group"><span class="pill" aria-hidden="true" /><span data-see-also><a href="/" class="hit hover:underline">home(1)</a>, <a href="/blog" class="hit hover:underline">blog(1)</a></span></span>
 
-<span data-footer>{placeholderHost}                  {today}                 NOTFOUND(404)</span></pre>
+<span data-footer>{placeholderHost}                  {placeholderDate}                 NOTFOUND(404)</span></pre>
       </div>
     </div>
   </div>
@@ -51,10 +51,17 @@ const today = '2026-04-22';
       buildAlignedLine,
     } from '@scripts/error-page';
 
+    const LINK_CLASS = 'hit hover:underline';
+    const MAX_PATH_WITH_HOST = 46;
+    const MIN_PATH = 16;
+    const MAIN_SITE = 'tsilenz.io';
+    const MAIN_SITE_URL = 'https://tsilenz.io/';
+
     const ctx = getPageContext();
     const statusInfo = ctx.statusInfo;
     const subjectToken = `${statusInfo.manSubject}(${ctx.status})`;
-    const isMainSite = ctx.hostname === 'tsilenz.io';
+    const isMainSite = ctx.hostname === MAIN_SITE;
+    const today = new Date().toISOString().slice(0, 10);
 
     document.title = `${ctx.status} — Taylor Silenzio`;
 
@@ -68,7 +75,7 @@ const today = '2026-04-22';
       el.textContent = `${ctx.status}    ${statusInfo.exitLabel}`;
     });
 
-    const maxPath = Math.max(16, 46 - ctx.hostname.length);
+    const maxPath = Math.max(MIN_PATH, MAX_PATH_WITH_HOST - ctx.hostname.length);
     const displayPath = truncateMiddle(ctx.path, maxPath);
     const truncated = displayPath !== ctx.path;
     const displayUrl = ctx.hostname + displayPath;
@@ -94,41 +101,40 @@ const today = '2026-04-22';
       }
       const footerEl = document.querySelector<HTMLElement>('[data-footer]');
       if (footerEl) {
-        footerEl.textContent = buildAlignedLine(width, ctx.hostname, '2026-04-22', subjectToken);
+        footerEl.textContent = buildAlignedLine(width, ctx.hostname, today, subjectToken);
       }
+    }
+
+    function makeLink(href: string, label: string): HTMLAnchorElement {
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = label;
+      a.className = LINK_CLASS;
+      return a;
     }
 
     function buildSeeAlso(): void {
       const seeAlsoEl = document.querySelector<HTMLElement>('[data-see-also]');
       if (!seeAlsoEl) return;
 
-      while (seeAlsoEl.firstChild) seeAlsoEl.removeChild(seeAlsoEl.firstChild);
+      seeAlsoEl.replaceChildren();
 
       const entries: HTMLAnchorElement[] = [];
 
       if (isMainSite) {
-        [
-          { href: '/', label: 'home(1)' },
-          { href: '/blog', label: 'blog(1)' },
-          { href: '/#projects', label: 'projects(1)' },
-        ].forEach((p) => {
-          const a = document.createElement('a');
-          a.href = p.href;
-          a.textContent = p.label;
-          a.className = 'hit hover:underline';
-          entries.push(a);
-        });
+        entries.push(
+          makeLink('/', 'home(1)'),
+          makeLink('/blog', 'blog(1)'),
+          makeLink('/#projects', 'projects(1)'),
+        );
       } else {
-        const backLink = document.createElement('a');
-        backLink.href = '#';
-        backLink.textContent = 'back(1)';
-        backLink.className = 'hit hover:underline';
+        const backLink = makeLink('#', 'back(1)');
         backLink.addEventListener('click', (e) => {
           e.preventDefault();
           if (window.history.length > 1) {
             window.history.back();
           } else {
-            window.location.href = 'https://tsilenz.io/';
+            window.location.href = MAIN_SITE_URL;
           }
         });
         entries.push(backLink);
@@ -136,25 +142,16 @@ const today = '2026-04-22';
         const ref = document.referrer;
         if (ref) {
           try {
-            const refUrl = new URL(ref);
-            const refHost = stripWww(refUrl.hostname);
+            const refHost = stripWww(new URL(ref).hostname);
             if (refHost && refHost !== ctx.hostname) {
-              const refLink = document.createElement('a');
-              refLink.href = ref;
-              refLink.textContent = `${refHost}(1)`;
-              refLink.className = 'hit hover:underline';
-              entries.push(refLink);
+              entries.push(makeLink(ref, `${refHost}(1)`));
             }
           } catch {
-            /* ignore malformed referrer */
+            // malformed referrer; skip the link rather than crash the page
           }
         }
 
-        const homeLink = document.createElement('a');
-        homeLink.href = 'https://tsilenz.io/';
-        homeLink.textContent = 'tsilenz.io(1)';
-        homeLink.className = 'hit hover:underline';
-        entries.push(homeLink);
+        entries.push(makeLink(MAIN_SITE_URL, `${MAIN_SITE}(1)`));
       }
 
       entries.forEach((el, i) => {
@@ -165,7 +162,7 @@ const today = '2026-04-22';
 
     buildSeeAlso();
 
-    const runLayout = () => {
+    const runLayout = (): void => {
       applyAlignment();
       document.querySelectorAll<HTMLElement>('.pill-group').forEach((group) => {
         initMagicPill(group);

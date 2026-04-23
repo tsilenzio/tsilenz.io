@@ -1,18 +1,13 @@
-// Analytics beacon stub
-// Fires events to a configurable endpoint. Currently a noop.
-// Wire this up to the real analytics service when it's ready.
-
 const ENDPOINT = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
 
 interface EventPayload {
   event: string;
   path: string;
-  referrer: string;
   timestamp: number;
   [key: string]: unknown;
 }
 
-function send(payload: EventPayload) {
+function send(payload: EventPayload): void {
   if (!ENDPOINT) return;
 
   try {
@@ -27,11 +22,11 @@ function send(payload: EventPayload) {
       });
     }
   } catch {
-    // silent fail
+    // analytics must never surface to the user
   }
 }
 
-function trackPageView() {
+function trackPageView(): void {
   send({
     event: 'page_view',
     path: window.location.pathname,
@@ -40,7 +35,7 @@ function trackPageView() {
   });
 }
 
-function trackOutboundClicks() {
+function trackOutboundClicks(): void {
   document.addEventListener('click', (e) => {
     const anchor = (e.target as Element).closest('a[href]');
     if (!anchor) return;
@@ -51,7 +46,6 @@ function trackOutboundClicks() {
     send({
       event: 'outbound_click',
       path: window.location.pathname,
-      referrer: '',
       timestamp: Date.now(),
       href,
     });

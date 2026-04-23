@@ -1,3 +1,6 @@
+const VISIBILITY_THRESHOLD = 0.1;
+const ROOT_MARGIN = '0px 0px -10% 0px';
+
 const observer = new IntersectionObserver(
   (entries) => {
     for (const entry of entries) {
@@ -7,7 +10,7 @@ const observer = new IntersectionObserver(
       }
     }
   },
-  { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+  { rootMargin: ROOT_MARGIN, threshold: VISIBILITY_THRESHOLD },
 );
 
 document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));

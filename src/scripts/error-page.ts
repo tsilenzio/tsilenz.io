@@ -1,7 +1,13 @@
 export const MARKER = '[..]';
 
+const HIDE_DELAY_MS = 60;
+const SKIP_SLIDE_DURATION_MS = 120;
+const PILL_EXTEND_X = 8;
+const PILL_EXTEND_Y = 5;
+const MEASURE_SAMPLE_SIZE = 100;
+
 export function stripWww(host: string): string {
-  return host.indexOf('www.') === 0 ? host.slice(4) : host;
+  return host.startsWith('www.') ? host.slice(4) : host;
 }
 
 export function normalizeHost(host: string): string {
@@ -107,8 +113,8 @@ export function getPageContext(): PageContext {
   const rawHost = params.get('hostname') || window.location.hostname;
   const hostname = normalizeHost(rawHost);
   const url = hostname + path;
-  const statusParam = params.get('status');
-  const status = (statusParam ? parseInt(statusParam, 10) : NaN) || 404;
+  const parsed = Number(params.get('status'));
+  const status = Number.isFinite(parsed) && parsed > 0 ? parsed : 404;
   return { path, rawHost, hostname, url, status, statusInfo: getStatusInfo(status) };
 }
 
@@ -123,31 +129,29 @@ export function initMagicPill(group: HTMLElement, linkSelector = '.hit, .hit-wid
   let visible = false;
   let leaveTimer: number | null = null;
 
-  function setPill(target: HTMLElement, skipSlide: boolean) {
+  const setPill = (target: HTMLElement, skipSlide: boolean): void => {
     if (leaveTimer) {
       window.clearTimeout(leaveTimer);
       leaveTimer = null;
     }
     const targetRect = target.getBoundingClientRect();
     const groupRect = group.getBoundingClientRect();
-    const extendX = 8;
-    const extendY = 5;
-    const top = targetRect.top - groupRect.top - extendY;
-    const left = targetRect.left - groupRect.left - extendX;
-    const width = targetRect.width + extendX * 2;
-    const height = targetRect.height + extendY * 2;
-    pill!.style.transition = skipSlide ? 'opacity 120ms ease' : '';
-    pill!.style.transform = `translate(${left}px, ${top}px)`;
-    pill!.style.width = `${width}px`;
-    pill!.style.height = `${height}px`;
-    pill!.setAttribute('data-active', 'true');
+    const top = targetRect.top - groupRect.top - PILL_EXTEND_Y;
+    const left = targetRect.left - groupRect.left - PILL_EXTEND_X;
+    const width = targetRect.width + PILL_EXTEND_X * 2;
+    const height = targetRect.height + PILL_EXTEND_Y * 2;
+    pill.style.transition = skipSlide ? `opacity ${SKIP_SLIDE_DURATION_MS}ms ease` : '';
+    pill.style.transform = `translate(${left}px, ${top}px)`;
+    pill.style.width = `${width}px`;
+    pill.style.height = `${height}px`;
+    pill.setAttribute('data-active', 'true');
     visible = true;
-  }
+  };
 
-  function hidePill() {
-    pill!.removeAttribute('data-active');
+  const hidePill = (): void => {
+    pill.removeAttribute('data-active');
     visible = false;
-  }
+  };
 
   links.forEach((link) => {
     link.addEventListener('mouseenter', () => setPill(link, !visible));
@@ -156,20 +160,20 @@ export function initMagicPill(group: HTMLElement, linkSelector = '.hit, .hit-wid
 
   group.addEventListener('mouseleave', () => {
     if (leaveTimer) window.clearTimeout(leaveTimer);
-    leaveTimer = window.setTimeout(hidePill, 60);
+    leaveTimer = window.setTimeout(hidePill, HIDE_DELAY_MS);
   });
 
   group.addEventListener('focusout', (e: FocusEvent) => {
     if (!group.contains(e.relatedTarget as Node | null)) {
       if (leaveTimer) window.clearTimeout(leaveTimer);
-      leaveTimer = window.setTimeout(hidePill, 60);
+      leaveTimer = window.setTimeout(hidePill, HIDE_DELAY_MS);
     }
   });
 }
 
 export function measureContainerChars(container: HTMLElement): number {
   const test = document.createElement('span');
-  test.textContent = '0'.repeat(100);
+  test.textContent = '0'.repeat(MEASURE_SAMPLE_SIZE);
   test.style.position = 'absolute';
   test.style.visibility = 'hidden';
   test.style.whiteSpace = 'pre';
@@ -178,7 +182,7 @@ export function measureContainerChars(container: HTMLElement): number {
   test.style.fontSize = computed.fontSize;
   test.style.fontWeight = computed.fontWeight;
   container.appendChild(test);
-  const charWidth = test.getBoundingClientRect().width / 100;
+  const charWidth = test.getBoundingClientRect().width / MEASURE_SAMPLE_SIZE;
   container.removeChild(test);
 
   const padLeft = parseFloat(computed.paddingLeft) || 0;

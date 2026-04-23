@@ -37,6 +37,11 @@ For more information about this error, try <a href="/" class="hit hover:underlin
   <script>
     import { getPageContext, truncateMiddle, initMagicPill } from '@scripts/error-page';
 
+    const BASELINE_MAX_DISPLAY = 25;
+    const MIN_DISPLAY = 14;
+    const BASELINE_PHRASE = 'cannot find page';
+    const BASELINE_HOST = 'tsilenz.io';
+
     const ctx = getPageContext();
     const statusInfo = ctx.statusInfo;
 
@@ -55,36 +60,21 @@ For more information about this error, try <a href="/" class="hit hover:underlin
       el.textContent = ctx.hostname;
     });
 
-    const baselineMax = 25;
-    const statusPenalty = Math.max(0, statusInfo.errorPhrase.length - 'cannot find page'.length);
-    const hostPenalty = Math.max(0, ctx.hostname.length - 'tsilenz.io'.length);
-    const MAX_DISPLAY = Math.max(14, baselineMax - statusPenalty - hostPenalty);
+    const statusPenalty = Math.max(0, statusInfo.errorPhrase.length - BASELINE_PHRASE.length);
+    const hostPenalty = Math.max(0, ctx.hostname.length - BASELINE_HOST.length);
+    const maxDisplay = Math.max(MIN_DISPLAY, BASELINE_MAX_DISPLAY - statusPenalty - hostPenalty);
 
-    let realPath = ctx.path;
+    const displayPath = truncateMiddle(ctx.path, maxDisplay);
+    const truncated = displayPath !== ctx.path;
 
-    function render(path: string): void {
-      realPath = path;
-      const displayPath = truncateMiddle(path, MAX_DISPLAY);
-      const truncated = displayPath !== path;
-
-      document.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
-        el.textContent = displayPath;
-        if (truncated) el.setAttribute('title', path);
-        else el.removeAttribute('title');
-      });
-      document.querySelectorAll<HTMLElement>('[data-carets]').forEach((el) => {
-        el.textContent = '^'.repeat(displayPath.length);
-      });
-    }
-
-    render(realPath);
-
-    (
-      window as unknown as { __tsilenz404: { render: typeof render; getRealPath: () => string } }
-    ).__tsilenz404 = {
-      render,
-      getRealPath: () => realPath,
-    };
+    document.querySelectorAll<HTMLElement>('[data-path]').forEach((el) => {
+      el.textContent = displayPath;
+      if (truncated) el.setAttribute('title', ctx.path);
+      else el.removeAttribute('title');
+    });
+    document.querySelectorAll<HTMLElement>('[data-carets]').forEach((el) => {
+      el.textContent = '^'.repeat(displayPath.length);
+    });
 
     document.querySelectorAll<HTMLElement>('.pill-group').forEach((group) => {
       initMagicPill(group);
