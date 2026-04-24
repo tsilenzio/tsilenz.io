@@ -6,14 +6,21 @@ import Footer from '@components/Footer.astro';
 interface Props {
   title?: string;
   description?: string;
+  ogTitle?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
 }
 
 const {
   title = 'Taylor Silenzio',
-  description = 'Software engineer building tools and infrastructure.',
+  description = 'Software engineer building Node.js backends and the developer tooling around them. Writing Rust on the side and bringing it to work piece by piece.',
+  ogTitle = 'Taylor Silenzio | backend · tools · rust',
+  ogImage = '/og.png',
+  ogType = 'website',
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site).href;
 ---
 
 <!doctype html>
@@ -24,10 +31,21 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
+    <meta property="og:site_name" content="Taylor Silenzio" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogTitle} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
 
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
