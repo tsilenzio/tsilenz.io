@@ -1,43 +1,42 @@
-# Astro Starter Kit: Minimal
+# tsilenz.io
+
+Source for my personal homepage at [tsilenz.io](https://tsilenz.io). Built with Astro, Tailwind v4, and TypeScript. The goal is a page that loads fast, reads easily, and doesn't overreach. No sparkles, no cursor trails, no portfolio showmanship.
+
+## Stack
+
+- **Astro** for the page shell and routing
+- **Tailwind CSS v4** for styles (theme defined inline in `src/styles/global.css`, no config file)
+- **MDX** for blog posts when those start landing
+- **TypeScript** in strict mode
+- **pnpm** as the package manager, **mise** for the Node version
+
+No frontend framework on the homepage itself. Astro components, a bit of vanilla TypeScript for the small interactive pieces (theme toggle, scroll reveal). The blog is wired up but empty. Posts come whenever they come.
+
+## Develop
 
 ```sh
-pnpm create astro@latest -- --template minimal
+pnpm install
+pnpm dev       # localhost:4321
+pnpm build     # static build into ./dist
+pnpm preview
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Checks before opening a PR:
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```sh
+pnpm typecheck
+pnpm lint
+pnpm format
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Formatting, linting, and commit-message conventions are also enforced via `lefthook` pre-commit and `cocogitto` commit-msg hooks, so most of this runs automatically on commit.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Design notes
 
-Any static assets, like images, can be placed in the `public/` directory.
+The look borrows from a handful of personal sites I spent time reading: [robdahl.dev](https://www.robdahl.dev), [jasonwebb.io](https://www.jasonwebb.io), [brianlovin.com/about](https://brianlovin.com/about), [soulwire.co.uk](https://soulwire.co.uk). Anything clean here is by way of one of them. Anything clumsy is mine.
 
-## 🧞 Commands
+Dark by default, light on request, persisted across tabs. Reduced-motion respected.
 
-All commands are run from the root of the project, from a terminal:
+## License
 
-| Command                | Action                                           |
-| :--------------------- | :----------------------------------------------- |
-| `pnpm install`         | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+[MIT](./LICENSE)
