@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+
+# AI training crawlers (content used to train models)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# AI assistants (surface content to live user queries)
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://tsilenz.io/sitemap-index.xml

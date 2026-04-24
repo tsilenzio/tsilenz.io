@@ -1,0 +1,14 @@
+# Taylor Silenzio
+
+> Software engineer building Node.js backends and the developer tooling around them. Writing Rust on the side and bringing it to work piece by piece.
+
+## About
+
+- [Homepage](https://tsilenz.io)
+- [GitHub](https://github.com/tsilenzio)
+- [LinkedIn](https://linkedin.com/in/tsilenzio)
+
+## Projects
+
+- [tsilenz.io](https://github.com/tsilenzio/tsilenz.io) - this site, open-source
+- [ssh-whoami](https://github.com/tsilenzio/ssh-whoami) - SSH identity service in Rust (in progress)

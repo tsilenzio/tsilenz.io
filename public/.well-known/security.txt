@@ -1,0 +1,4 @@
+Contact: https://github.com/tsilenzio/tsilenz.io/security/advisories/new
+Expires: 2027-04-24T00:00:00Z
+Preferred-Languages: en
+Canonical: https://tsilenz.io/.well-known/security.txt
