@@ -1,5 +1,5 @@
 const VISIBILITY_THRESHOLD = 0.1;
-const ROOT_MARGIN = '0px 0px -10% 0px';
+const ROOT_MARGIN = '0px';
 
 const observer = new IntersectionObserver(
   (entries) => {
