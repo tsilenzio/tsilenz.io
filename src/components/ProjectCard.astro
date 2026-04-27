@@ -9,6 +9,11 @@ interface Props {
 
 const { title, description, status, tech, href } = Astro.props;
 
+const traceLabel = `project-${title
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')}`;
+
 const statusColors = {
   Active: 'bg-(--color-status-active)/15 text-(--color-status-active)',
   'In Progress': 'bg-(--color-status-progress)/15 text-(--color-status-progress)',
@@ -28,6 +33,7 @@ const statusColors = {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
+            data-trace-event={traceLabel}
             class="text-(--color-text) hover:text-(--color-accent) transition-colors"
           >
             {title}

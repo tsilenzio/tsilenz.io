@@ -3,8 +3,13 @@ import { Image } from 'astro:assets';
 import meImage from '../assets/me.jpg';
 
 const socials = [
-  { href: 'https://github.com/tsilenzio', label: 'GitHub', icon: 'github' },
-  { href: 'https://linkedin.com/in/tsilenzio', label: 'LinkedIn', icon: 'linkedin' },
+  { href: 'https://github.com/tsilenzio', label: 'GitHub', icon: 'github', trace: 'hero-github' },
+  {
+    href: 'https://linkedin.com/in/tsilenzio',
+    label: 'LinkedIn',
+    icon: 'linkedin',
+    trace: 'hero-linkedin',
+  },
 ];
 ---
 
@@ -37,12 +42,13 @@ const socials = [
       </p>
       <div class="mt-5 flex gap-3 animate-fade-in" style="animation-delay: 180ms">
         {
-          socials.map(({ href, label, icon }) => (
+          socials.map(({ href, label, icon, trace }) => (
             <a
               href={href}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={label}
+              data-trace-event={trace}
               class="rounded-md p-2 text-(--color-text-muted) hover:text-(--color-text) hover:bg-(--color-bg-alt) transition-colors"
             >
               {icon === 'github' && (
