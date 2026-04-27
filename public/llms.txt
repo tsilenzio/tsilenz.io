@@ -11,4 +11,4 @@
 ## Projects
 
 - [tsilenz.io](https://github.com/tsilenzio/tsilenz.io) - this site, open-source
-- [ssh-whoami](https://github.com/tsilenzio/ssh-whoami) - SSH identity service in Rust (in progress)
+- [whoami.tsilenz.io](https://github.com/tsilenzio/whoami.tsilenz.io) - SSH identity service in Rust (in progress)
