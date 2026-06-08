@@ -14,7 +14,7 @@ const socials = [
 ---
 
 <section class="mx-auto max-w-3xl px-6 pt-16 pb-12 sm:pt-24 sm:pb-16">
-  <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:gap-8">
+  <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-start sm:gap-8">
     <div class="animate-fade-in shrink-0" style="animation-delay: 100ms">
       <Image
         src={meImage}
@@ -27,12 +27,17 @@ const socials = [
     </div>
     <div class="flex-1">
       <h1 class="text-4xl font-bold tracking-tight animate-fade-in">Taylor Silenzio</h1>
-      <p
-        class="mt-2 text-lg text-(--color-text-muted) animate-fade-in"
+      <div
+        class="mt-2 flex flex-wrap items-center gap-3 animate-fade-in"
         style="animation-delay: 60ms"
       >
-        Software Engineer
-      </p>
+        <p class="text-lg text-(--color-text-muted)">Software Engineer</p>
+        <span
+          class="rounded-full bg-(--color-status-active)/15 px-2.5 py-0.5 text-xs font-medium text-(--color-status-active)"
+        >
+          Seeking full-time roles
+        </span>
+      </div>
       <p
         class="mt-4 max-w-lg text-(--color-text-muted) animate-fade-in"
         style="animation-delay: 120ms"
