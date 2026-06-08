@@ -29,6 +29,10 @@ interface EventPayload {
   client_ts: number;
   path: string;
   referrer?: string;
+  query?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
   destination?: string;
   element_id?: string;
   duration_ms?: number;
@@ -81,12 +85,17 @@ function ensureSessionId(): string {
 }
 
 function basePayload(eventType: EventType): EventPayload {
+  const params = new URLSearchParams(window.location.search);
   return {
     event_type: eventType,
     session_id: ensureSessionId(),
     client_ts: Date.now(),
     path: window.location.pathname,
     referrer: document.referrer || undefined,
+    query: window.location.search.slice(1) || undefined,
+    utm_source: params.get('utm_source') || undefined,
+    utm_medium: params.get('utm_medium') || undefined,
+    utm_campaign: params.get('utm_campaign') || undefined,
     screen_w: window.screen?.width,
     screen_h: window.screen?.height,
     viewport_w: window.innerWidth,
