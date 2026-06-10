@@ -1,0 +1,513 @@
+---
+import '../styles/global.css';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import meImage from '../assets/me.jpg';
+import ProjectCard from '@components/ProjectCard.astro';
+import ThemeToggle from '@components/ThemeToggle.astro';
+import WhoamiCallout from '@components/WhoamiCallout.astro';
+import SectionHeader from '@components/SectionHeader.astro';
+import SocialLinks from '@components/SocialLinks.astro';
+
+// Prototype layout for comparison against the current homepage. The section data below is
+// mirrored from Experience/Projects/Skills since those arrays live un-exported in their
+// components. If this layout wins, the data gets lifted into a shared module and de-duplicated.
+const jobs = [
+  {
+    role: 'Senior Software Engineer',
+    company: 'Keller Williams Realty',
+    period: '2019 — May 2026',
+    description:
+      'Built event-driven data pipelines, real-time notification systems, and cross-platform services for a consumer real estate platform serving 180K+ agents. Wrote a translation sync CLI in Go, then rewrote it in Rust.',
+  },
+  {
+    role: 'Senior Software Engineer',
+    company: 'Apricity Health',
+    period: '2018 — 2019',
+    description:
+      'Designed a distributed tracing and logging system for healthcare microservices, correlating frontend and backend events across dozens of cloud functions.',
+  },
+  {
+    role: 'Senior Software Engineer',
+    company: 'Genband',
+    period: '2016 — 2018',
+    description:
+      'Architected and led a full application rewrite from Angular to React for a unified communications platform, designing the component architecture and WebRTC integration.',
+  },
+  {
+    role: 'Senior Software Engineer',
+    company: 'Yashi',
+    period: '2013 — 2016',
+    description:
+      'Pitched and built an API-first architecture to consolidate two platforms under a 90-day deadline, then designed role-based access control and unified authentication from scratch.',
+  },
+];
+
+const projects = [
+  {
+    title: 'whoami.tsilenz.io',
+    description:
+      'An SSH server that identifies visitors by their public keys against GitHub. Connect and see what it knows about you.',
+    status: 'In Progress' as const,
+    tech: ['Rust', 'SSH', 'PostgreSQL', 'GitHub API', 'GeoIP'],
+    href: 'https://github.com/tsilenzio/whoami.tsilenz.io',
+  },
+  {
+    title: 'trace',
+    description:
+      'Self-hosted visitor analytics with fingerprint-based tracking, GeoIP, and a public dashboard.',
+    status: 'Planned' as const,
+    tech: ['Rust', 'SQLite', 'GeoIP'],
+  },
+  {
+    title: 'diorama',
+    description:
+      'TUI tool for previewing terminal color themes with realistic scenarios. See how your colors actually look before committing.',
+    status: 'Active' as const,
+    tech: ['Rust', 'ratatui', 'crossterm', 'clap', 'TUI'],
+    href: 'https://github.com/tsilenzio/diorama',
+  },
+  {
+    title: 'homelab',
+    description:
+      'Single-node Proxmox homelab managed through Terraform and pyinfra. The disposable-rootfs pattern was validated by a live destroy-and-rebuild, with stateful workloads surviving untouched on ZFS.',
+    status: 'Active' as const,
+    tech: ['Terraform', 'pyinfra', 'Python', 'Proxmox', 'ZFS', 'LXC'],
+    href: 'https://github.com/tsilenzio/homelab',
+  },
+  {
+    title: 'dotfiles',
+    description:
+      'Bundle-based macOS bootstrap with hierarchical encrypted secrets. Age/SOPS keys unlock via Touch ID through macOS Keychain, and the whole system is rebuildable from a single memorable password.',
+    status: 'Active' as const,
+    tech: ['Bash', 'age/SOPS', 'GPG', 'macOS'],
+    href: 'https://github.com/tsilenzio/dotfiles',
+  },
+  {
+    title: 'tsilenz.io',
+    description:
+      'The site you are on. Static-first with a dark/light theme, blog infrastructure, and an embedded analytics beacon that talks to trace.',
+    status: 'Active' as const,
+    tech: ['Astro', 'TypeScript', 'Tailwind'],
+    href: 'https://github.com/tsilenzio/tsilenz.io',
+  },
+  {
+    title: 'rune-keychain',
+    description:
+      'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
+    status: 'On Hold' as const,
+    tech: ['Rust', 'macOS Keychain', 'CLI'],
+    href: 'https://github.com/tsilenzio/rune-keychain',
+  },
+  {
+    title: 'tokify',
+    description:
+      'Cross-platform token counter for GPT models. Counts tokens per-file and across entire directories.',
+    status: 'Active' as const,
+    tech: ['Go', 'tiktoken', 'CLI'],
+    href: 'https://github.com/tsilenzio/tokify',
+  },
+];
+
+const skillCategories = [
+  {
+    name: 'Languages',
+    items: ['Rust', 'Go', 'TypeScript', 'JavaScript', 'Python', 'C#', 'Java', 'SQL', 'Bash', 'Lua'],
+  },
+  {
+    name: 'Infrastructure & Cloud',
+    items: [
+      'Docker',
+      'Linux',
+      'Kubernetes',
+      'Terraform',
+      'GCP',
+      'Serverless',
+      'Nginx',
+      'OpenResty',
+      'CI/CD',
+    ],
+  },
+  {
+    name: 'Data & Messaging',
+    items: ['PostgreSQL', 'MongoDB', 'Redis', 'BigQuery', 'Pub/Sub', 'RabbitMQ', 'Elasticsearch'],
+  },
+  {
+    name: 'Frameworks & APIs',
+    items: ['Node.js', 'NestJS', 'GraphQL', 'REST', 'WebRTC', 'React.js', 'Flutter'],
+  },
+];
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const navItems = [
+  { id: 'about', label: 'about' },
+  { id: 'experience', label: 'experience' },
+  { id: 'projects', label: 'projects' },
+  { id: 'skills', label: 'skills' },
+  { id: 'writing', label: 'writing' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Taylor Silenzio — split-rail layout prototype" />
+    <meta name="robots" content="noindex" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Taylor Silenzio · layout v2</title>
+
+    {/* Inline theme init to prevent FOUC */}
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem('theme');
+        const stored = theme === 'light' || theme === 'dark' ? theme : null;
+        const preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (stored === 'light' || (!stored && preferLight)) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-(--color-bg) text-(--color-text)">
+    {/* ---------- top bar (below xl) ---------- */}
+    <header
+      class="sticky top-0 z-50 border-b border-(--color-border) bg-(--color-bg)/80 backdrop-blur-md xl:hidden"
+    >
+      <nav class="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+        <a
+          href="#about"
+          class="font-mono text-sm font-semibold text-(--color-text) hover:text-(--color-accent)"
+        >
+          tsilenz.io
+        </a>
+        <div class="flex items-center gap-4 sm:gap-6">
+          <div class="hidden items-center gap-6 sm:flex">
+            {
+              navItems.map((item) => (
+                <a
+                  href={`#${item.id}`}
+                  data-spy={item.id}
+                  class="nav-link topnav-link text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
+                >
+                  {item.label}
+                </a>
+              ))
+            }
+          </div>
+          <ThemeToggle id="theme-toggle-top" />
+        </div>
+      </nav>
+    </header>
+
+    <div class="mx-auto max-w-7xl xl:flex xl:flex-row xl:gap-16 xl:px-6">
+      {/* ---------- left rail (xl+) ---------- */}
+      <header
+        class="hidden pt-16 pb-8 xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen xl:w-[40%] xl:shrink-0 xl:py-24"
+      >
+        <div>
+          <Image
+            src={meImage}
+            alt="Taylor Silenzio"
+            width={160}
+            height={160}
+            loading="eager"
+            class="mb-5 size-20 rounded-full border border-(--color-border) object-cover"
+          />
+          <h1 class="text-4xl font-bold tracking-tight">Taylor Silenzio</h1>
+          <div class="mt-2.5 flex flex-wrap items-center gap-3">
+            <span class="text-lg text-(--color-text-muted)">Software Engineer</span>
+            <span
+              class="rounded-full bg-(--color-status-active)/15 px-2.5 py-0.5 text-xs font-medium text-(--color-status-active)"
+            >
+              Seeking full-time roles
+            </span>
+          </div>
+          <p class="mt-4 max-w-xs text-sm leading-relaxed text-(--color-text-muted)">
+            I build tools and infrastructure. Backend systems, developer tooling, and what Rust can
+            do in the places I used to reach for Node.
+          </p>
+
+          <nav class="mt-11 font-mono">
+            <ul>
+              {
+                navItems.map((item, i) => (
+                  <li class="my-3">
+                    <a
+                      href={`#${item.id}`}
+                      data-spy={item.id}
+                      class="nav-link group inline-flex items-baseline gap-3 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
+                    >
+                      <span class="idx text-xs text-(--color-border) transition-colors">
+                        {`0${i + 1}`}
+                      </span>
+                      <span class="caret -mr-1.5 text-(--color-accent)">▸</span>
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </div>
+
+        <div class="mt-auto flex items-center gap-2 pt-10">
+          <SocialLinks trace="rail" />
+          <ThemeToggle id="theme-toggle-rail" />
+        </div>
+      </header>
+
+      {/* ---------- content (single copy of sections) ---------- */}
+      <main
+        class="mx-auto w-full max-w-3xl px-6 pb-20 xl:mx-0 xl:max-w-none xl:flex-1 xl:px-0 xl:py-24"
+      >
+        {/* identity header block (below xl) */}
+        <div
+          class="flex flex-col items-start gap-6 pt-16 pb-12 sm:flex-row sm:items-start sm:gap-8 sm:pt-24 sm:pb-16 xl:hidden"
+        >
+          <Image
+            src={meImage}
+            alt="Taylor Silenzio"
+            width={320}
+            height={320}
+            loading="eager"
+            class="size-28 shrink-0 rounded-full border border-(--color-border) object-cover sm:size-40"
+          />
+          <div>
+            <h1 class="text-4xl font-bold tracking-tight">Taylor Silenzio</h1>
+            <div class="mt-2 flex flex-wrap items-center gap-3">
+              <span class="text-lg text-(--color-text-muted)">Software Engineer</span>
+              <span
+                class="rounded-full bg-(--color-status-active)/15 px-2.5 py-0.5 text-xs font-medium text-(--color-status-active)"
+              >
+                Seeking full-time roles
+              </span>
+            </div>
+            <p class="mt-4 max-w-lg leading-relaxed text-(--color-text-muted)">
+              I build tools and infrastructure. Backend systems, developer tooling, and what Rust
+              can do in the places I used to reach for Node.
+            </p>
+            <SocialLinks class="mt-5" trace="hero" />
+          </div>
+        </div>
+
+        <section id="about" class="reveal mb-20 scroll-mt-24">
+          <SectionHeader label="about" />
+          <p class="mb-4 max-w-xl leading-relaxed text-(--color-text-muted)">
+            I'm a software engineer who likes the unglamorous layer: event-driven pipelines,
+            real-time systems, and the developer tooling that makes the rest of the team faster.
+            Most of my career has been Node.js backends at scale. Lately I've been bringing Rust
+            into the places it earns its keep.
+          </p>
+          <p class="max-w-xl leading-relaxed text-(--color-text-muted)">
+            At Keller Williams I built data pipelines and notification systems for a real estate
+            platform serving 180K+ agents, and rewrote a translation-sync CLI from Go into Rust.
+            Outside work I run a single-node Proxmox homelab and build small CLIs and TUIs.
+          </p>
+
+          <div class="mt-8">
+            <WhoamiCallout />
+          </div>
+        </section>
+
+        <section id="experience" class="reveal mb-20 scroll-mt-24">
+          <SectionHeader label="experience" />
+          <div class="timeline">
+            {
+              jobs.map((job) => (
+                <div class="tl">
+                  <div class="font-mono text-xs tracking-wide text-(--color-text-muted)">
+                    {job.period}
+                  </div>
+                  <h3 class="mt-1 font-semibold">{job.role}</h3>
+                  <p class="text-sm text-(--color-accent)">{job.company}</p>
+                  <p class="mt-2 max-w-xl text-sm leading-relaxed text-(--color-text-muted)">
+                    {job.description}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <section id="projects" class="reveal mb-20 scroll-mt-24">
+          <SectionHeader label="projects" />
+          <div class="grid gap-4 sm:grid-cols-2">
+            {projects.map((project) => <ProjectCard {...project} />)}
+          </div>
+        </section>
+
+        <section id="skills" class="reveal mb-20 scroll-mt-24">
+          <SectionHeader label="skills" />
+          <div class="space-y-5">
+            {
+              skillCategories.map(({ name, items }) => (
+                <div>
+                  <h3 class="mb-2.5 text-sm font-medium text-(--color-text-muted)">{name}</h3>
+                  <div class="flex flex-wrap gap-2">
+                    {items.map((item) => (
+                      <span class="rounded-md border border-(--color-border) bg-(--color-bg-alt) px-3 py-1 text-sm">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <section id="writing" class="reveal scroll-mt-24">
+          <SectionHeader label="writing">
+            {
+              posts.length > 0 && (
+                <a
+                  href="/blog"
+                  class="shrink-0 font-sans text-sm text-(--color-text-muted) hover:text-(--color-accent)"
+                >
+                  View all &rarr;
+                </a>
+              )
+            }
+          </SectionHeader>
+          {
+            posts.length > 0 ? (
+              <div class="space-y-4">
+                {posts.map((post) => (
+                  <a
+                    href={`/blog/${post.id}`}
+                    class="group -mx-4 block rounded-lg p-4 transition-colors hover:bg-(--color-bg-alt)"
+                  >
+                    <div class="flex items-baseline justify-between gap-4">
+                      <h3 class="font-medium transition-colors group-hover:text-(--color-accent)">
+                        {post.data.title}
+                      </h3>
+                      <time
+                        class="shrink-0 text-sm text-(--color-text-muted)"
+                        datetime={post.data.date.toISOString()}
+                      >
+                        {post.data.date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </time>
+                    </div>
+                    {post.data.description && (
+                      <p class="mt-1 text-sm text-(--color-text-muted)">{post.data.description}</p>
+                    )}
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p class="text-sm text-(--color-text-muted)">
+                Posts coming soon. In the meantime, check out my <a href="#projects">projects</a>.
+              </p>
+            )
+          }
+        </section>
+      </main>
+    </div>
+
+    <script src="@scripts/theme.ts"></script>
+    <script src="@scripts/reveal.ts"></script>
+    <script src="@scripts/beacon.ts"></script>
+    <script>
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav-link'));
+      const sections = links
+        .map((link) => document.getElementById(link.dataset.spy ?? ''))
+        .filter((el): el is HTMLElement => el !== null);
+
+      const visible = new Set<string>();
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) visible.add(entry.target.id);
+            else visible.delete(entry.target.id);
+          }
+          // Highlight the topmost section currently inside the activation band.
+          const current = sections.find((section) => visible.has(section.id));
+          if (current) {
+            links.forEach((link) =>
+              link.classList.toggle('is-active', link.dataset.spy === current.id),
+            );
+          }
+        },
+        { rootMargin: '0px 0px -70% 0px', threshold: 0 },
+      );
+
+      sections.forEach((section) => observer.observe(section));
+    </script>
+
+    <style>
+      .nav-link .caret {
+        opacity: 0;
+        transition: opacity 0.18s ease;
+      }
+      .nav-link:hover .caret,
+      .nav-link.is-active .caret {
+        opacity: 1;
+      }
+      .nav-link.is-active {
+        color: var(--color-text);
+        font-weight: 500;
+      }
+      .nav-link.is-active .idx {
+        color: var(--color-accent);
+      }
+
+      /* Top-bar nav active state (below xl): underline accent instead of the rail caret/index. */
+      .topnav-link.is-active {
+        box-shadow: inset 0 -2px 0 var(--color-accent);
+      }
+
+      /* Kept for reuse: small mono accent eyebrow/kicker (was the comparison label style). */
+      .cmp-label {
+        margin-bottom: 8px;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-accent);
+      }
+
+      .timeline {
+        position: relative;
+        padding-left: 28px;
+      }
+      .timeline::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 6px;
+        bottom: 6px;
+        width: 1px;
+        background: var(--color-border);
+      }
+      .tl {
+        position: relative;
+        padding-bottom: 34px;
+      }
+      .tl:last-child {
+        padding-bottom: 0;
+      }
+      .tl::before {
+        content: '';
+        position: absolute;
+        left: -28px;
+        top: 5px;
+        width: 9px;
+        height: 9px;
+        border-radius: 9999px;
+        background: var(--color-bg);
+        border: 2px solid var(--color-accent);
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+---
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={[
+    'rounded-lg border border-(--color-border) bg-(--color-bg-alt) p-3.5 font-mono text-sm',
+    className,
+  ]}
+>
+  <div class="mb-2.5 flex items-center justify-between text-(--color-text-muted)">
+    <div class="flex items-center gap-2">
+      <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="4 17 10 11 4 5"></polyline>
+        <line x1="12" y1="19" x2="20" y2="19"></line>
+      </svg>
+      <span>Terminal</span>
+    </div>
+    <span
+      class="rounded-full bg-(--color-status-progress)/15 px-2.5 py-0.5 font-sans text-xs font-medium text-(--color-status-progress)"
+    >
+      Experimental
+    </span>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="select-none text-(--color-text-muted)">$</span>
+    <code class="text-(--color-accent)">ssh whoami.tsilenz.io</code>
+  </div>
+  <p class="mt-3 font-sans text-xs text-(--color-text-muted)">
+    See what my SSH server knows about you. Built in
+    <a href="https://github.com/tsilenzio" target="_blank" rel="noopener noreferrer">Rust</a>.
+  </p>
+</div>

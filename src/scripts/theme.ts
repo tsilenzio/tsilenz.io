@@ -27,10 +27,10 @@ function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.toggle('light', theme === 'light');
 
-  const toggle = document.getElementById('theme-toggle');
-  if (toggle) {
-    toggle.setAttribute('aria-label', `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`);
-  }
+  const label = `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`;
+  document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+    toggle.setAttribute('aria-label', label);
+  });
 }
 
 function setTheme(theme: Theme): void {

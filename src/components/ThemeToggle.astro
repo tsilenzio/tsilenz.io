@@ -1,5 +1,14 @@
+---
+interface Props {
+  id?: string;
+}
+
+const { id = 'theme-toggle' } = Astro.props;
+---
+
 <button
-  id="theme-toggle"
+  id={id}
+  data-theme-toggle
   type="button"
   onclick="window.__toggleTheme()"
   aria-label="Toggle theme"
