@@ -58,14 +58,18 @@ body {
   color: var(--color-accent);
 }
 
-a {
-  color: var(--color-accent);
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
+/* In @layer base so text-color utilities (e.g. text-(--color-text-muted) on nav
+   links) can override the default link color; unlayered rules would outrank them. */
+@layer base {
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
 
-a:hover {
-  color: var(--color-accent-hover);
+  a:hover {
+    color: var(--color-accent-hover);
+  }
 }
 
 code {
