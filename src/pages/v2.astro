@@ -201,9 +201,61 @@ const navItems = [
               ))
             }
           </div>
+          <button
+            id="mobile-nav-toggle"
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded="false"
+            aria-controls="mobile-nav"
+            class="cursor-pointer rounded-md p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-bg-alt) hover:text-(--color-text) sm:hidden"
+          >
+            <svg
+              class="icon-menu size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <svg
+              class="icon-close size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+              <line x1="6" y1="18" x2="18" y2="6"></line>
+            </svg>
+          </button>
           <ThemeToggle id="theme-toggle-top" />
         </div>
       </nav>
+
+      {/* mobile dropdown menu (below sm) */}
+      <div
+        id="mobile-nav"
+        class="hidden border-t border-(--color-border) bg-(--color-bg) sm:hidden"
+      >
+        <div class="mx-auto flex max-w-3xl flex-col px-6 pb-3">
+          {
+            navItems.map((item) => (
+              <a
+                href={`#${item.id}`}
+                data-spy={item.id}
+                class="nav-link py-2.5 font-mono text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </div>
+      </div>
     </header>
 
     <div class="mx-auto max-w-7xl xl:flex xl:flex-row xl:gap-16 xl:px-6">
@@ -420,29 +472,67 @@ const navItems = [
     <script src="@scripts/beacon.ts"></script>
     <script>
       const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.nav-link'));
-      const sections = links
-        .map((link) => document.getElementById(link.dataset.spy ?? ''))
+      const ids = [...new Set(links.map((link) => link.dataset.spy))].filter((id): id is string =>
+        Boolean(id),
+      );
+      const sections = ids
+        .map((id) => document.getElementById(id))
         .filter((el): el is HTMLElement => el !== null);
 
-      const visible = new Set<string>();
-      const observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) visible.add(entry.target.id);
-            else visible.delete(entry.target.id);
-          }
-          // Highlight the topmost section currently inside the activation band.
-          const current = sections.find((section) => visible.has(section.id));
-          if (current) {
-            links.forEach((link) =>
-              link.classList.toggle('is-active', link.dataset.spy === current.id),
-            );
-          }
-        },
-        { rootMargin: '0px 0px -70% 0px', threshold: 0 },
-      );
+      const setActive = (id: string) => {
+        links.forEach((link) => link.classList.toggle('is-active', link.dataset.spy === id));
+      };
 
-      sections.forEach((section) => observer.observe(section));
+      const update = () => {
+        if (sections.length === 0) return;
+        // The activation line glides from the top of the viewport at the top of the page
+        // down to the bottom at the end, so the highlight tracks scroll progress and the
+        // final sections stay reachable. The active section is the last whose top has
+        // crossed the line, which means it always straddles the line and is on screen.
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+        const line = window.innerHeight * progress;
+        let current = sections[0];
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top <= line) current = section;
+        }
+        setActive(current.id);
+      };
+
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          update();
+          ticking = false;
+        });
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      update();
+    </script>
+
+    <script>
+      // Mobile dropdown menu toggle (below sm).
+      const navToggle = document.getElementById('mobile-nav-toggle');
+      const mobileNav = document.getElementById('mobile-nav');
+      if (navToggle && mobileNav) {
+        const setOpen = (open: boolean) => {
+          navToggle.setAttribute('aria-expanded', String(open));
+          mobileNav.classList.toggle('hidden', !open);
+        };
+        navToggle.addEventListener('click', () =>
+          setOpen(navToggle.getAttribute('aria-expanded') !== 'true'),
+        );
+        mobileNav
+          .querySelectorAll('a')
+          .forEach((link) => link.addEventListener('click', () => setOpen(false)));
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') setOpen(false);
+        });
+      }
     </script>
 
     <style>
@@ -465,6 +555,17 @@ const navItems = [
       /* Top-bar nav active state (below xl): underline accent instead of the rail caret/index. */
       .topnav-link.is-active {
         box-shadow: inset 0 -2px 0 var(--color-accent);
+      }
+
+      /* Mobile menu icon swap, driven by the button's aria-expanded state. */
+      #mobile-nav-toggle .icon-close {
+        display: none;
+      }
+      #mobile-nav-toggle[aria-expanded='true'] .icon-menu {
+        display: none;
+      }
+      #mobile-nav-toggle[aria-expanded='true'] .icon-close {
+        display: block;
       }
 
       /* Kept for reuse: small mono accent eyebrow/kicker (was the comparison label style). */
