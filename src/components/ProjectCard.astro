@@ -15,8 +15,8 @@ const traceLabel = `project-${title
   .replace(/^-+|-+$/g, '')}`;
 
 const statusColors = {
-  Active: 'bg-(--color-status-active)/15 text-(--color-status-active)',
-  'In Progress': 'bg-(--color-status-progress)/15 text-(--color-status-progress)',
+  Active: 'badge-active bg-(--color-status-active)/15 text-(--color-status-active)',
+  'In Progress': 'badge-progress bg-(--color-status-progress-bg) text-(--color-status-progress-fg)',
   'On Hold': 'bg-(--color-status-planned)/15 text-(--color-status-planned)',
   Planned: 'bg-(--color-status-planned)/15 text-(--color-status-planned)',
 } as const;
@@ -60,7 +60,7 @@ const statusColors = {
   <div class="mt-auto pt-3 flex flex-wrap gap-1.5">
     {
       tech.map((t) => (
-        <span class="rounded-md bg-(--color-bg-alt) px-2 py-0.5 text-xs text-(--color-text-muted)">
+        <span class="tech-chip rounded-md bg-(--color-chip-bg) px-2 py-0.5 text-xs text-(--color-text)">
           {t}
         </span>
       ))

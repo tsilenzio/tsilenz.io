@@ -49,7 +49,7 @@ const projects = [
     description:
       'An SSH server that identifies visitors by their public keys against GitHub. Connect and see what it knows about you.',
     status: 'In Progress' as const,
-    tech: ['Rust', 'SSH', 'PostgreSQL', 'GitHub API', 'GeoIP'],
+    tech: ['Rust', 'SSH', 'PostgreSQL', 'GitHub API'],
     href: 'https://github.com/tsilenzio/whoami.tsilenz.io',
   },
   {
@@ -68,17 +68,25 @@ const projects = [
     href: 'https://github.com/tsilenzio/diorama',
   },
   {
+    title: 'rune-keychain',
+    description:
+      'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
+    status: 'On Hold' as const,
+    tech: ['Rust', 'macOS Keychain', 'CLI'],
+    href: 'https://github.com/tsilenzio/rune-keychain',
+  },
+  {
     title: 'homelab',
     description:
       'Single-node Proxmox homelab managed through Terraform and pyinfra. The disposable-rootfs pattern was validated by a live destroy-and-rebuild, with stateful workloads surviving untouched on ZFS.',
     status: 'Active' as const,
-    tech: ['Terraform', 'pyinfra', 'Python', 'Proxmox', 'ZFS', 'LXC'],
+    tech: ['Terraform', 'pyinfra', 'Python', 'Proxmox'],
     href: 'https://github.com/tsilenzio/homelab',
   },
   {
     title: 'dotfiles',
     description:
-      'Bundle-based macOS bootstrap with hierarchical encrypted secrets. Age/SOPS keys unlock via Touch ID through macOS Keychain, and the whole system is rebuildable from a single memorable password.',
+      'Bundle-based macOS bootstrap with hierarchical encrypted secrets. Age/SOPS keys unlock via Touch ID through macOS Keychain, and the system is rebuildable from a single memorable password.',
     status: 'Active' as const,
     tech: ['Bash', 'age/SOPS', 'GPG', 'macOS'],
     href: 'https://github.com/tsilenzio/dotfiles',
@@ -90,14 +98,6 @@ const projects = [
     status: 'Active' as const,
     tech: ['Astro', 'TypeScript', 'Tailwind'],
     href: 'https://github.com/tsilenzio/tsilenz.io',
-  },
-  {
-    title: 'rune-keychain',
-    description:
-      'A keychain utility built in Rust. Secure credential storage with a clean CLI interface.',
-    status: 'On Hold' as const,
-    tech: ['Rust', 'macOS Keychain', 'CLI'],
-    href: 'https://github.com/tsilenzio/rune-keychain',
   },
   {
     title: 'tokify',
@@ -161,6 +161,44 @@ const navItems = [
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Taylor Silenzio · layout v2</title>
+
+    {
+      /* Tech-tag chip elevation, applied to /v2 only: light V3, dark V5, plus a slight chip border. */
+    }
+    <style is:global>
+      :root {
+        --color-chip-bg: #323e51;
+      }
+      :root.light {
+        --color-chip-bg: #f3f4f6;
+      }
+      .tech-chip {
+        border: 1px solid rgba(226, 232, 240, 0.16);
+      }
+      :root.light .tech-chip {
+        border-color: rgba(15, 23, 42, 0.16);
+      }
+
+      /* Status-badge treatment, /v2 only (added via inert classes on the shared badge
+         spans so v1 stays borderless and single-tone). From the swatch decision: 1px dim
+         border, soft in dark and medium in light. Amber colors already live in
+         global.css, so only the border is added here. Green light moves to the G-C
+         two-tone because the single-tone green failed AA (2.9:1) on light. */
+      .badge-progress {
+        border: 1px solid rgba(251, 191, 36, 0.1925);
+      }
+      :root.light .badge-progress {
+        border: 1px solid rgba(138, 105, 20, 0.385);
+      }
+      .badge-active {
+        border: 1px solid rgba(52, 211, 153, 0.1925);
+      }
+      :root.light .badge-active {
+        background-color: rgba(5, 150, 105, 0.22);
+        color: #064e3b;
+        border: 1px solid rgba(3, 83, 58, 0.385);
+      }
+    </style>
 
     {/* Inline theme init to prevent FOUC */}
     <script is:inline>
@@ -258,10 +296,10 @@ const navItems = [
       </div>
     </header>
 
-    <div class="mx-auto max-w-7xl xl:flex xl:max-w-[71rem] xl:flex-row xl:gap-12">
+    <div class="mx-auto max-w-7xl xl:flex xl:max-w-none xl:justify-center xl:px-22">
       {/* ---------- left rail (xl+) ---------- */}
       <header
-        class="hidden pt-16 pb-8 xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen xl:w-[26rem] xl:shrink-0 xl:py-24"
+        class="hidden pt-16 pb-8 xl:flex xl:flex-col xl:sticky xl:top-0 xl:h-screen xl:w-[22rem] xl:shrink-0 xl:py-24"
       >
         <div>
           <Image
@@ -295,7 +333,7 @@ const navItems = [
                       data-spy={item.id}
                       class="nav-link group inline-flex items-baseline gap-3 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
                     >
-                      <span class="idx text-xs text-(--color-border) transition-colors">
+                      <span class="idx text-xs text-(--color-text-muted)/70 transition-colors">
                         {`0${i + 1}`}
                       </span>
                       <span class="caret -mr-1.5 text-(--color-accent)">▸</span>
@@ -314,9 +352,14 @@ const navItems = [
         </div>
       </header>
 
+      {
+        /* ---------- fluid gutter (xl+): greedy up to its max, then page margins absorb the rest ---------- */
+      }
+      <div class="hidden xl:block xl:min-w-8 xl:max-w-48 xl:grow" aria-hidden="true"></div>
+
       {/* ---------- content (single copy of sections) ---------- */}
       <main
-        class="mx-auto w-full max-w-3xl px-6 pb-20 xl:mx-0 xl:max-w-none xl:flex-1 xl:px-0 xl:py-24"
+        class="mx-auto w-full max-w-3xl px-6 pb-20 xl:mx-0 xl:w-[41.25rem] xl:max-w-none xl:shrink-0 xl:grow-0 xl:px-0 xl:py-24"
       >
         <section id="about" class="reveal mb-20 scroll-mt-24">
           {/* identity header block (below xl) — nested so the "about" anchor lands on it */}
@@ -350,13 +393,13 @@ const navItems = [
             </div>
           </div>
           <SectionHeader label="about" />
-          <p class="mb-4 max-w-xl leading-relaxed text-(--color-text-muted)">
+          <p class="mb-4 leading-relaxed text-(--color-text-muted)">
             I'm a software engineer who likes the unglamorous layer: event-driven pipelines,
             real-time systems, and the developer tooling that makes the rest of the team faster.
             Most of my career has been Node.js backends at scale. Lately I've been bringing Rust
             into the places it earns its keep.
           </p>
-          <p class="max-w-xl leading-relaxed text-(--color-text-muted)">
+          <p class="leading-relaxed text-(--color-text-muted)">
             At Keller Williams I built data pipelines and notification systems for a real estate
             platform serving 180K+ agents, and rewrote a translation-sync CLI from Go into Rust.
             Outside work I run a single-node Proxmox homelab and build small CLIs and TUIs.
@@ -378,7 +421,7 @@ const navItems = [
                   </div>
                   <h3 class="mt-1 font-semibold">{job.role}</h3>
                   <p class="text-sm text-(--color-accent)">{job.company}</p>
-                  <p class="mt-2 max-w-xl text-sm leading-relaxed text-(--color-text-muted)">
+                  <p class="mt-2 text-sm leading-relaxed text-(--color-text-muted)">
                     {job.description}
                   </p>
                 </div>
