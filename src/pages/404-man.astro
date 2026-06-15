@@ -1,5 +1,5 @@
 ---
-import Base from '@layouts/Base.astro';
+import PageLayout from '@layouts/PageLayout.astro';
 import '../styles/error.css';
 
 const placeholderPath = '/the-page-you-wanted';
@@ -7,7 +7,7 @@ const placeholderHost = 'tsilenz.io';
 const placeholderDate = new Date().toISOString().slice(0, 10);
 ---
 
-<Base title="404 (man) — Taylor Silenzio">
+<PageLayout title="404 (man) — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
     <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
       <div
@@ -175,4 +175,4 @@ const placeholderDate = new Date().toISOString().slice(0, 10);
       runLayout();
     }
   </script>
-</Base>
+</PageLayout>

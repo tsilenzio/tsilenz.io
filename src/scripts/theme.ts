@@ -1,11 +1,5 @@
 export {};
 
-declare global {
-  interface Window {
-    __toggleTheme?: () => void;
-  }
-}
-
 const STORAGE_KEY = 'theme';
 
 type Theme = 'dark' | 'light';
@@ -57,13 +51,10 @@ function init(): void {
   });
 }
 
-// Delegated toggle binding. Replaces the inline onclick=window.__toggleTheme() on the
-// toggle buttons; the global is kept until the last inline caller is gone.
+// Delegated toggle binding: any [data-theme-toggle] element flips the theme.
 document.addEventListener('click', (e) => {
   const target = e.target as Element | null;
   if (target?.closest('[data-theme-toggle]')) toggle();
 });
-
-window.__toggleTheme = toggle;
 
 init();
