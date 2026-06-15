@@ -1,0 +1,23 @@
+---
+// Inlines an SVG from src/icons/<name>.svg and forwards the caller's class onto the
+// <svg> tag (the icons carry their own viewBox/stroke/fill). Build fails fast on a typo.
+interface Props {
+  name: string;
+  class?: string;
+}
+
+const { name, class: className } = Astro.props;
+
+const icons = import.meta.glob<string>('../../icons/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+const raw = icons[`../../icons/${name}.svg`];
+if (!raw) throw new Error(`Icon not found: ${name}`);
+
+const svg = className ? raw.replace('<svg', `<svg class="${className}"`) : raw;
+---
+
+<Fragment set:html={svg} />
