@@ -1,5 +1,5 @@
 ---
-import Base from '@layouts/Base.astro';
+import PageLayout from '@layouts/PageLayout.astro';
 import { getCollection } from 'astro:content';
 
 const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
@@ -7,7 +7,7 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
 );
 ---
 
-<Base title="Writing — Taylor Silenzio" description="Blog posts and technical writing.">
+<PageLayout title="Writing — Taylor Silenzio" description="Blog posts and technical writing.">
   <div class="mx-auto max-w-3xl px-6 pt-24 pb-20">
     <h1 class="text-3xl font-bold tracking-tight mb-2">Writing</h1>
     <p class="text-(--color-text-muted) mb-10">Thoughts on software, tools, and building things.</p>
@@ -46,4 +46,4 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
       )
     }
   </div>
-</Base>
+</PageLayout>

@@ -1,5 +1,5 @@
 ---
-import Base from '@layouts/Base.astro';
+import PageLayout from '@layouts/PageLayout.astro';
 import '../styles/error.css';
 
 const placeholderPath = '/the-page-you-wanted';
@@ -7,7 +7,7 @@ const placeholderCarets = '^'.repeat(placeholderPath.length);
 const placeholderHost = 'tsilenz.io';
 ---
 
-<Base title="404 — Taylor Silenzio">
+<PageLayout title="404 — Taylor Silenzio">
   <div class="mx-auto max-w-3xl px-6 pt-20 pb-20">
     <div class="overflow-hidden rounded-lg border border-(--color-border) bg-(--color-bg-alt)">
       <div
@@ -80,4 +80,4 @@ For more information about this error, try <a href="/" class="hit hover:underlin
       initMagicPill(group);
     });
   </script>
-</Base>
+</PageLayout>
