@@ -9,7 +9,6 @@
   --color-bg: #0f172a;
   --color-bg-alt: #1e293b;
   --color-bg-card: #1e293b;
-  --color-chip-bg: #1e293b;
   --color-border: #334155;
   --color-text: #e2e8f0;
   --color-text-muted: #94a3b8;
@@ -17,17 +16,30 @@
   --color-accent-hover: #7dd3fc;
   --color-accent-muted: rgba(56, 189, 248, 0.1);
 
+  /* "Seeking" availability accent (the dot + label) */
   --color-status-active: #34d399;
-  --color-status-progress-bg: rgba(251, 191, 36, 0.15);
-  --color-status-progress-fg: #fbbf24;
-  --color-status-planned: #94a3b8;
+}
+
+/* Status-badge palette, consumed by Badge.astro via var(). Plain custom properties
+   rather than @theme entries since they back component CSS, not Tailwind utilities. */
+:root {
+  --status-progress-bg: rgba(251, 191, 36, 0.15);
+  --status-progress-fg: #fbbf24;
+  --status-progress-border: rgba(251, 191, 36, 0.1925);
+
+  --status-active-bg: color-mix(in oklab, #34d399 15%, transparent);
+  --status-active-fg: #34d399;
+  --status-active-border: rgba(52, 211, 153, 0.1925);
+
+  --status-planned-bg: color-mix(in oklab, #94a3b8 15%, transparent);
+  --status-planned-fg: #94a3b8;
+  --status-planned-border: rgba(148, 163, 184, 0.1925);
 }
 
 :root.light {
   --color-bg: #f8fafc;
   --color-bg-alt: #f1f5f9;
   --color-bg-card: #ffffff;
-  --color-chip-bg: #f1f5f9;
   --color-border: #e2e8f0;
   --color-text: #0f172a;
   --color-text-muted: #64748b;
@@ -35,10 +47,20 @@
   --color-accent-hover: #0369a1;
   --color-accent-muted: rgba(2, 132, 199, 0.08);
 
-  --color-status-active: #059669;
-  --color-status-progress-bg: rgba(251, 191, 36, 0.28);
-  --color-status-progress-fg: #5c4a0a;
-  --color-status-planned: #64748b;
+  /* darker than #059669 (3.6:1) so the seeking accent clears AA on the light bg (5.2:1) */
+  --color-status-active: #047857;
+
+  --status-progress-bg: rgba(251, 191, 36, 0.28);
+  --status-progress-fg: #5c4a0a;
+  --status-progress-border: rgba(138, 105, 20, 0.385);
+
+  --status-active-bg: rgba(5, 150, 105, 0.22);
+  --status-active-fg: #064e3b;
+  --status-active-border: rgba(3, 83, 58, 0.385);
+
+  --status-planned-bg: color-mix(in oklab, #64748b 15%, transparent);
+  --status-planned-fg: #64748b;
+  --status-planned-border: rgba(55, 64, 76, 0.385);
 }
 
 html {
