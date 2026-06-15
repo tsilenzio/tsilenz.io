@@ -1,0 +1,56 @@
+---
+import type { BadgeVariant } from '@/types';
+
+interface Props {
+  variant: BadgeVariant;
+  class?: string;
+}
+
+const { variant, class: className } = Astro.props;
+---
+
+<span class:list={['badge', `badge-${variant}`, className]}><slot /></span>
+
+<style>
+  .badge {
+    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* amber: in progress / experimental */
+  .badge-in-progress,
+  .badge-experimental {
+    background-color: var(--color-status-progress-bg);
+    color: var(--color-status-progress-fg);
+    border: 1px solid rgba(251, 191, 36, 0.1925);
+  }
+  :global(:root.light) .badge-in-progress,
+  :global(:root.light) .badge-experimental {
+    border-color: rgba(138, 105, 20, 0.385);
+  }
+
+  /* green: active */
+  .badge-active {
+    background-color: color-mix(in oklab, var(--color-status-active) 15%, transparent);
+    color: var(--color-status-active);
+    border: 1px solid rgba(52, 211, 153, 0.1925);
+  }
+  :global(:root.light) .badge-active {
+    background-color: rgba(5, 150, 105, 0.22);
+    color: #064e3b;
+    border-color: rgba(3, 83, 58, 0.385);
+  }
+
+  /* slate: on hold / planned */
+  .badge-on-hold,
+  .badge-planned {
+    background-color: color-mix(in oklab, var(--color-status-planned) 15%, transparent);
+    color: var(--color-status-planned);
+  }
+</style>

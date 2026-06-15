@@ -1,0 +1,44 @@
+---
+import Icon from '@ui/Icon.astro';
+import Badge from '@ui/Badge.astro';
+import type { BadgeVariant } from '@/types';
+
+// The SSH terminal callout. Prop-driven so the caller positions it (replaces the v1
+// SshCallout + v2 WhoamiCallout pair). Caption content goes in the default slot.
+interface Props {
+  command: string;
+  label?: string;
+  badge?: BadgeVariant | null;
+  class?: string;
+}
+
+const { command, label = 'Terminal', badge = 'experimental', class: className } = Astro.props;
+---
+
+<div
+  class:list={[
+    'rounded-lg border border-(--color-border) bg-(--color-bg-alt) p-3.5 font-mono text-sm',
+    className,
+  ]}
+>
+  <div class="mb-2.5 flex items-center justify-between text-(--color-text-muted)">
+    <div class="flex items-center gap-2">
+      <Icon name="terminal" class="size-4" />
+      <span>{label}</span>
+    </div>
+    {
+      badge && (
+        <Badge variant={badge} class="font-sans">
+          Experimental
+        </Badge>
+      )
+    }
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="select-none text-(--color-text-muted)">$</span>
+    <code class="text-(--color-accent)">{command}</code>
+  </div>
+  <p class="mt-3 font-sans text-xs text-(--color-text-muted)">
+    <slot />
+  </p>
+</div>

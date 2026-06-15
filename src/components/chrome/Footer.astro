@@ -1,0 +1,20 @@
+---
+import SocialLinks from '@ui/SocialLinks.astro';
+import { site } from '@/config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-8 border-t border-(--color-border)">
+  <div class="mx-auto max-w-3xl px-6 py-8">
+    <div class="flex items-center justify-between">
+      <span class="text-sm text-(--color-text-muted)">&copy; {year} {site.name}</span>
+      <SocialLinks trace="footer" />
+    </div>
+    <p class="mt-6 text-xs leading-relaxed text-(--color-text-muted)">
+      This site sends visit events to a self-hosted analytics service on my homelab. A long-lived
+      cookie identifies returning visitors. IP address, browser, and approximate location are
+      recorded. No third-party trackers and no advertising.
+    </p>
+  </div>
+</footer>

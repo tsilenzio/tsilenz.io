@@ -1,0 +1,12 @@
+---
+import SectionHeader from '@ui/SectionHeader.astro';
+import ProjectCard from '@ui/ProjectCard.astro';
+import { projects } from '@data/projects';
+---
+
+<section id="projects" data-trace-section="projects" class="reveal mb-20 scroll-mt-24">
+  <SectionHeader label="projects" />
+  <div class="grid gap-4 sm:grid-cols-2">
+    {projects.map((project) => <ProjectCard {...project} />)}
+  </div>
+</section>

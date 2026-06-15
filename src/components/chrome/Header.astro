@@ -1,0 +1,40 @@
+---
+import ThemeToggle from '@components/chrome/ThemeToggle.astro';
+
+// Simple top bar for sub-pages (blog, error). Nav points back to the homepage anchors.
+const navLinks = [
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#experience', label: 'Experience' },
+  { href: '/#skills', label: 'Skills' },
+  { href: '/blog', label: 'Writing' },
+];
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-(--color-border) bg-(--color-bg)/80 backdrop-blur-md"
+>
+  <nav class="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
+    <a
+      href="/"
+      class="font-mono text-sm font-semibold text-(--color-text) hover:text-(--color-accent)"
+    >
+      tsilenz.io
+    </a>
+
+    <div class="flex items-center gap-4 sm:gap-6">
+      <div class="hidden items-center gap-6 sm:flex">
+        {
+          navLinks.map(({ href, label }) => (
+            <a
+              href={href}
+              class="text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
+            >
+              {label}
+            </a>
+          ))
+        }
+      </div>
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>

@@ -1,18 +1,16 @@
 ---
-import Base from '@layouts/Base.astro';
-import Hero from '@components/Hero.astro';
-import SshCallout from '@components/SshCallout.astro';
-import Projects from '@components/Projects.astro';
-import Experience from '@components/Experience.astro';
-import Skills from '@components/Skills.astro';
-import Writing from '@components/Writing.astro';
+import HomeLayout from '@layouts/HomeLayout.astro';
+import About from '@components/sections/About.astro';
+import Experience from '@components/sections/Experience.astro';
+import Projects from '@components/sections/Projects.astro';
+import Skills from '@components/sections/Skills.astro';
+import Writing from '@components/sections/Writing.astro';
 ---
 
-<Base>
-  <Hero />
-  <SshCallout />
+<HomeLayout>
+  <About />
   <Experience />
   <Projects />
   <Skills />
   <Writing />
-</Base>
+</HomeLayout>

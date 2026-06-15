@@ -1,0 +1,62 @@
+---
+import Badge from '@ui/Badge.astro';
+import Icon from '@ui/Icon.astro';
+import { STATUS_LABEL } from '@/types';
+import type { Project } from '@/types';
+
+type Props = Project;
+
+const { slug, title, description, status, tech, href } = Astro.props;
+---
+
+<div
+  class="group flex h-full flex-col rounded-lg border border-(--color-border) bg-(--color-bg-card) p-5 transition-all duration-200 hover:border-(--color-accent)/30 hover:shadow-lg hover:shadow-(--color-accent)/5"
+>
+  <div class="flex items-start justify-between gap-3">
+    <h3 class="font-semibold">
+      {
+        href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-trace-event={`project-${slug}`}
+            class="text-(--color-text) transition-colors hover:text-(--color-accent)"
+          >
+            {title}
+            <Icon
+              name="arrow"
+              class="ml-1 inline-block size-3.5 opacity-0 transition-opacity group-hover:opacity-100"
+            />
+          </a>
+        ) : (
+          title
+        )
+      }
+    </h3>
+    <Badge variant={status} class="shrink-0">{STATUS_LABEL[status]}</Badge>
+  </div>
+  <p class="mt-2 text-sm text-(--color-text-muted)">{description}</p>
+  <div class="mt-auto flex flex-wrap gap-1.5 pt-3">
+    {tech.map((t) => <span class="tech-chip">{t}</span>)}
+  </div>
+</div>
+
+<style>
+  /* Tech-tag chip with the elevated surface + dim border (Material elevation: lighter
+     than the card in dark, darker in light). */
+  .tech-chip {
+    display: inline-block;
+    border-radius: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-text);
+    background-color: #323e51;
+    border: 1px solid rgba(226, 232, 240, 0.16);
+  }
+  :global(:root.light) .tech-chip {
+    background-color: #f3f4f6;
+    border-color: rgba(15, 23, 42, 0.16);
+  }
+</style>
