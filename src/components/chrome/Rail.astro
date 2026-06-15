@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import meImage from '../../assets/me.jpg';
+import SocialLinks from '@ui/SocialLinks.astro';
+import ThemeToggle from '@components/chrome/ThemeToggle.astro';
+import { navItems } from '@data/nav';
+import { site } from '@/config';
+---
+
+<header
+  class="hidden pt-16 pb-8 xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[22rem] xl:shrink-0 xl:flex-col xl:py-24"
+>
+  <div>
+    <Image
+      src={meImage}
+      alt={site.name}
+      width={160}
+      height={160}
+      loading="eager"
+      class="mb-5 size-20 rounded-full border border-(--color-border) object-cover"
+    />
+    <h1 class="text-4xl font-bold tracking-tight">{site.name}</h1>
+    <div class="mt-2.5 flex flex-col items-start gap-2.5">
+      <span class="text-lg text-(--color-text-muted)">{site.role}</span>
+      <span class="flex items-center gap-2 text-xs font-medium text-(--color-status-active)">
+        <span class="size-1.5 rounded-full bg-(--color-status-active)"></span>
+        {site.availability}
+      </span>
+    </div>
+    <p class="mt-4 max-w-xs text-sm leading-relaxed text-(--color-text-muted)">{site.bio}</p>
+
+    <nav class="mt-11 font-mono">
+      <ul>
+        {
+          navItems.map((item, i) => (
+            <li class="my-3">
+              <a
+                href={`#${item.id}`}
+                data-spy={item.id}
+                class="nav-link group inline-flex items-baseline gap-3 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text)"
+              >
+                <span class="idx text-xs text-(--color-text-muted)/70 transition-colors">
+                  {`0${i + 1}`}
+                </span>
+                <span class="caret -mr-1.5 text-(--color-accent)">▸</span>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="mt-auto flex items-center gap-2 pt-10">
+    <SocialLinks trace="rail" />
+    <ThemeToggle id="theme-toggle-rail" />
+  </div>
+</header>

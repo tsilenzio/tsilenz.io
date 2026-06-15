@@ -57,6 +57,13 @@ function init(): void {
   });
 }
 
+// Delegated toggle binding. Replaces the inline onclick=window.__toggleTheme() on the
+// toggle buttons; the global is kept until the last inline caller is gone.
+document.addEventListener('click', (e) => {
+  const target = e.target as Element | null;
+  if (target?.closest('[data-theme-toggle]')) toggle();
+});
+
 window.__toggleTheme = toggle;
 
 init();

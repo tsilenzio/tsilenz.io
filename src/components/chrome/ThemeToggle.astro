@@ -1,0 +1,31 @@
+---
+import Icon from '@ui/Icon.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id = 'theme-toggle' } = Astro.props;
+---
+
+<button
+  id={id}
+  data-theme-toggle
+  type="button"
+  aria-label="Toggle theme"
+  data-trace-event="theme-toggle"
+  class="cursor-pointer rounded-md p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-bg-alt) hover:text-(--color-text)"
+>
+  {/* Sun shown in dark mode, moon in light mode (driven by the html.light class). */}
+  <Icon name="sun" class="sun hidden size-5" />
+  <Icon name="moon" class="moon hidden size-5" />
+</button>
+
+<style>
+  :global(:root:not(.light) .sun) {
+    display: block;
+  }
+  :global(:root.light .moon) {
+    display: block;
+  }
+</style>

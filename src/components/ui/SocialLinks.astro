@@ -1,0 +1,28 @@
+---
+import Icon from '@ui/Icon.astro';
+import { socials } from '@data/socials';
+
+interface Props {
+  class?: string;
+  trace?: string;
+}
+
+const { class: className = '', trace } = Astro.props;
+---
+
+<div class:list={['flex items-center gap-2', className]}>
+  {
+    socials.map(({ href, label, icon }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={label}
+        data-trace-event={trace ? `${trace}-${icon}` : undefined}
+        class="rounded-md p-2 text-(--color-text-muted) transition-colors hover:bg-(--color-bg-alt) hover:text-(--color-text)"
+      >
+        <Icon name={icon} class="size-5" />
+      </a>
+    ))
+  }
+</div>

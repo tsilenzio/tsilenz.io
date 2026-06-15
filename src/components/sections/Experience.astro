@@ -1,0 +1,64 @@
+---
+import SectionHeader from '@ui/SectionHeader.astro';
+import { jobs } from '@data/experience';
+import { site } from '@/config';
+---
+
+<section id="experience" data-trace-section="experience" class="reveal mb-20 scroll-mt-24">
+  <SectionHeader label="experience" />
+  <div class="timeline">
+    {
+      jobs.map((job) => (
+        <div class="tl">
+          <div class="font-mono text-xs tracking-wide text-(--color-text-muted)">{job.period}</div>
+          <h3 class="mt-1 font-semibold">{job.role}</h3>
+          <p class="text-sm text-(--color-accent)">{job.company}</p>
+          <p class="mt-2 text-sm leading-relaxed text-(--color-text-muted)">{job.description}</p>
+        </div>
+      ))
+    }
+  </div>
+  <p class="mt-6 text-sm text-(--color-text-muted)">
+    Full history on
+    <a
+      href={site.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-trace-event="experience-linkedin">LinkedIn</a
+    >.
+  </p>
+</section>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--color-border);
+  }
+  .tl {
+    position: relative;
+    padding-bottom: 34px;
+  }
+  .tl:last-child {
+    padding-bottom: 0;
+  }
+  .tl::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    background: var(--color-bg);
+    border: 2px solid var(--color-accent);
+  }
+</style>

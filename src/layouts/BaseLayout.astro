@@ -1,0 +1,89 @@
+---
+import '@/styles/global.css';
+import { site } from '@/config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  bodyClass?: string;
+}
+
+const {
+  title = site.title,
+  description = site.description,
+  ogTitle = site.ogTitle,
+  ogImage = site.ogImage,
+  ogType = 'website',
+  noindex = false,
+  bodyClass = '',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImageURL = new URL(ogImage, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={site.locale} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogTitle} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+
+    {/* Inline theme init to prevent FOUC */}
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem('theme');
+        const stored = theme === 'light' || theme === 'dark' ? theme : null;
+        const preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (stored === 'light' || (!stored && preferLight)) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
+  </head>
+  <body
+    class:list={[
+      'min-h-screen bg-(--color-bg) text-(--color-text) transition-colors duration-200',
+      bodyClass,
+    ]}
+  >
+    <slot />
+    <script src="@scripts/theme.ts"></script>
+    <script src="@scripts/reveal.ts"></script>
+    <script src="@scripts/beacon.ts"></script>
+    {
+      /* scroll-spy and mobile-nav are home-only behaviours, but Astro hoists scripts
+        reliably only as unconditional children of the layout that renders <html>. Both
+        guard on their target elements, so they no-op on pages without the rail/menu. */
+    }
+    <script src="@scripts/scroll-spy.ts"></script>
+    <script src="@scripts/mobile-nav.ts"></script>
+  </body>
+</html>

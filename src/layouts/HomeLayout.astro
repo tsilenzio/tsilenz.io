@@ -1,0 +1,67 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TopBar from '@components/chrome/TopBar.astro';
+import Rail from '@components/chrome/Rail.astro';
+import Footer from '@components/chrome/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogTitle?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<BaseLayout {...props}>
+  <TopBar />
+  <div class="mx-auto max-w-7xl xl:flex xl:max-w-none xl:justify-center xl:px-22">
+    <Rail />
+    {/* fluid gutter (xl+): greedy up to its max, then page margins absorb the rest */}
+    <div class="hidden xl:block xl:min-w-8 xl:max-w-48 xl:grow" aria-hidden="true"></div>
+    <main
+      class="mx-auto w-full max-w-3xl px-6 pb-20 xl:mx-0 xl:w-[41.25rem] xl:max-w-none xl:shrink-0 xl:grow-0 xl:px-0 xl:py-24"
+    >
+      <slot />
+    </main>
+  </div>
+  <Footer />
+</BaseLayout>
+
+<style is:global>
+  /* Rail nav: caret reveal + active index/color. Shared across the rail and top bar so it
+     lives here rather than in either chrome component. */
+  .nav-link .caret {
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+  .nav-link:hover .caret,
+  .nav-link.is-active .caret {
+    opacity: 1;
+  }
+  .nav-link.is-active {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+  .nav-link.is-active .idx {
+    color: var(--color-accent);
+  }
+
+  /* Top-bar nav active state (below xl): underline accent instead of the rail caret/index. */
+  .topnav-link.is-active {
+    box-shadow: inset 0 -2px 0 var(--color-accent);
+  }
+
+  /* Mobile menu icon swap, driven by the button's aria-expanded state. */
+  #mobile-nav-toggle .icon-close {
+    display: none;
+  }
+  #mobile-nav-toggle[aria-expanded='true'] .icon-menu {
+    display: none;
+  }
+  #mobile-nav-toggle[aria-expanded='true'] .icon-close {
+    display: block;
+  }
+</style>

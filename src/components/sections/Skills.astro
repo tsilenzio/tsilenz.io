@@ -1,0 +1,24 @@
+---
+import SectionHeader from '@ui/SectionHeader.astro';
+import { skillCategories } from '@data/skills';
+---
+
+<section id="skills" data-trace-section="skills" class="reveal mb-20 scroll-mt-24">
+  <SectionHeader label="skills" />
+  <div class="space-y-5">
+    {
+      skillCategories.map(({ name, items }) => (
+        <div>
+          <h3 class="mb-2.5 text-sm font-medium text-(--color-text-muted)">{name}</h3>
+          <div class="flex flex-wrap gap-2">
+            {items.map((item) => (
+              <span class="rounded-md border border-(--color-border) bg-(--color-bg-alt) px-3 py-1 text-sm">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
