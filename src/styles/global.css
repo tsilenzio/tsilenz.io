@@ -9,6 +9,7 @@
   --color-bg: #0f172a;
   --color-bg-alt: #1e293b;
   --color-bg-card: #1e293b;
+  --color-bg-card-hover: #273449;
   --color-border: #334155;
   --color-text: #e2e8f0;
   --color-text-muted: #94a3b8;
@@ -40,6 +41,7 @@
   --color-bg: #f8fafc;
   --color-bg-alt: #f1f5f9;
   --color-bg-card: #ffffff;
+  --color-bg-card-hover: #ffffff;
   --color-border: #e2e8f0;
   --color-text: #0f172a;
   --color-text-muted: #64748b;

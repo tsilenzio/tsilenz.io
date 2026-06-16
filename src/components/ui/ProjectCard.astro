@@ -7,30 +7,40 @@ import type { Project } from '@/types';
 type Props = Project;
 
 const { slug, title, description, status, tech, href } = Astro.props;
+
+// Whole card is one link when there's an href, so the pointer cursor covers the
+// entire surface rather than just the title (matches the blog-entry pattern).
+const Tag = href ? 'a' : 'div';
+const linkAttrs = href
+  ? { href, target: '_blank', rel: 'noopener noreferrer', 'data-trace-event': `project-${slug}` }
+  : {};
+
+// Hover lift, linked cards only. Dark mode reads the lift from the lighter surface
+// (--color-bg-card-hover); light mode from the shadow, since its card is already white
+// and can't lighten. The 1.5px accent border thickens a touch without shifting the grid
+// (border-box keeps the outer size fixed).
+const CARD_BASE =
+  'group flex h-full flex-col rounded-lg border border-(--color-border) bg-(--color-bg-card) p-5 transition-all duration-200';
+const CARD_HOVER =
+  'hover:-translate-y-0.5 hover:border-[1.5px] hover:border-(--color-accent)/30 hover:bg-(--color-bg-card-hover) hover:shadow-lg hover:shadow-(--color-accent)/5 motion-reduce:transform-none';
+const cardClass = href ? `${CARD_BASE} ${CARD_HOVER}` : CARD_BASE;
 ---
 
-<div
-  class="group flex h-full flex-col rounded-lg border border-(--color-border) bg-(--color-bg-card) p-5 transition-all duration-200 hover:border-(--color-accent)/30 hover:shadow-lg hover:shadow-(--color-accent)/5"
->
+<Tag class={cardClass} {...linkAttrs}>
   <div class="flex items-start justify-between gap-3">
-    <h3 class="font-semibold">
+    <h3
+      class:list={[
+        'font-semibold text-(--color-text)',
+        href && 'transition-colors group-hover:text-(--color-accent)',
+      ]}
+    >
+      {title}
       {
-        href ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-trace-event={`project-${slug}`}
-            class="text-(--color-text) transition-colors hover:text-(--color-accent)"
-          >
-            {title}
-            <Icon
-              name="arrow"
-              class="ml-1 inline-block size-3.5 opacity-0 transition-opacity group-hover:opacity-100"
-            />
-          </a>
-        ) : (
-          title
+        href && (
+          <Icon
+            name="arrow"
+            class="ml-1 inline-block size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none"
+          />
         )
       }
     </h3>
@@ -40,7 +50,7 @@ const { slug, title, description, status, tech, href } = Astro.props;
   <div class="mt-auto flex flex-wrap gap-1.5 pt-3">
     {tech.map((t) => <span class="tech-chip">{t}</span>)}
   </div>
-</div>
+</Tag>
 
 <style>
   /* Tech-tag chip with the elevated surface + dim border (Material elevation: lighter
