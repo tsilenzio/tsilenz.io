@@ -1,5 +1,6 @@
 ---
 import Icon from '@ui/Icon.astro';
+import ResumeLink from '@ui/ResumeLink.astro';
 import ThemeToggle from '@components/chrome/ThemeToggle.astro';
 import { navItems } from '@data/nav';
 ---
@@ -39,6 +40,7 @@ import { navItems } from '@data/nav';
         <Icon name="menu" class="icon-menu size-5" />
         <Icon name="close" class="icon-close size-5" />
       </button>
+      <ResumeLink class="py-1" trace="resume-topbar" />
       <ThemeToggle id="theme-toggle-top" />
     </div>
   </nav>

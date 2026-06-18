@@ -1,0 +1,26 @@
+---
+import { site } from '@/config';
+
+// "Resume" call-to-action used in both the rail (desktop) and the top bar (mobile/tablet),
+// so it stays visible in whichever chrome is on screen. Opens the PDF in a new tab; the
+// caller positions it via class. trace defaults are set per placement for the beacon.
+interface Props {
+  class?: string;
+  trace?: string;
+}
+
+const { class: className, trace = 'resume' } = Astro.props;
+---
+
+<a
+  href={site.resume}
+  target="_blank"
+  rel="noopener noreferrer"
+  data-trace-event={trace}
+  class:list={[
+    'inline-flex items-center rounded-md border border-(--color-accent)/40 px-3 py-1.5 text-sm font-medium text-(--color-accent) transition-colors hover:bg-(--color-accent-muted)',
+    className,
+  ]}
+>
+  Resume
+</a>
