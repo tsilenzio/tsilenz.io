@@ -17,12 +17,12 @@ const linkAttrs = href
 
 // Hover lift, linked cards only. Dark mode reads the lift from the lighter surface
 // (--color-bg-card-hover); light mode from the shadow, since its card is already white
-// and can't lighten. The 1.5px accent border thickens a touch without shifting the grid
-// (border-box keeps the outer size fixed).
+// and can't lighten. The border shifts color on hover but not width, so the content box
+// stays fixed and a long description can't reflow into an extra line and jump the grid.
 const CARD_BASE =
   'group flex h-full flex-col rounded-lg border border-(--color-border) bg-(--color-bg-card) p-5 transition-all duration-200';
 const CARD_HOVER =
-  'hover:-translate-y-0.5 hover:border-[1.5px] hover:border-(--color-accent)/30 hover:bg-(--color-bg-card-hover) hover:shadow-lg hover:shadow-(--color-accent)/5 motion-reduce:transform-none';
+  'hover:-translate-y-0.5 hover:border-(--color-accent)/30 hover:bg-(--color-bg-card-hover) hover:shadow-lg hover:shadow-(--color-accent)/5 motion-reduce:transform-none';
 const cardClass = href ? `${CARD_BASE} ${CARD_HOVER}` : CARD_BASE;
 ---
 
