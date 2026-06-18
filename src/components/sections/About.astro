@@ -35,15 +35,26 @@ import { site } from '@/config';
   </div>
   <SectionHeader label="about" />
   <p class="mb-4 leading-relaxed text-(--color-text-muted)">
-    I'm a software engineer who likes the unglamorous layer: event-driven pipelines, real-time
-    systems, and the developer tooling that makes the rest of the team faster. Most of my career has
-    been Node.js backends at scale. Lately I've been bringing Rust into the places it earns its
-    keep.
+    I work a layer below where most people stop looking, in the event-driven pipelines, real-time
+    systems, and internal tooling a team leans on without thinking about it. The tooling is the part
+    I can't leave alone. Hand me a deploy step that takes minutes and I'll turn it into a
+    save-and-refresh loop, or a build everyone quietly works around and I'll keep sanding it down
+    until the path to production feels boring in the best way.
+  </p>
+  <p class="mb-4 leading-relaxed text-(--color-text-muted)">
+    Obstacles tend to make me dig in rather than back off. When a serializer I needed had vanished
+    from the codebase and no one could find it, I wrote one that round-tripped every record in
+    production. When an upload kept failing for no reason anyone could name, I tracked it to a
+    single invisible byte at the front of the file. The parts of a system nobody else volunteered to
+    learn are usually where I end up.
   </p>
   <p class="leading-relaxed text-(--color-text-muted)">
-    At Keller Williams I built data pipelines and notification systems for a real estate platform
-    serving 180K+ agents, and rewrote a translation-sync CLI from Go into Rust. Outside work I run a
-    single-node Proxmox homelab and build small CLIs and TUIs.
+    Most of my career has been Node.js and TypeScript backends at scale. At Keller Williams I built
+    data pipelines and saved-search notifications for a platform serving 180K+ agents, plus a
+    white-label product that retired a third-party vendor and cut roughly $2.7M a year. A long run
+    through PHP, Node, TypeScript, and Go is what pulled me toward Rust, where most of my attention
+    goes now, down to the FFI layer. Outside work I run a single-node Proxmox homelab and build
+    small CLIs and TUIs, usually because the tool I wanted didn't exist yet.
   </p>
 
   <div class="mt-8">
