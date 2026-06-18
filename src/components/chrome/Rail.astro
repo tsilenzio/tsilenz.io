@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import meImage from '../../assets/me.jpg';
 import SocialLinks from '@ui/SocialLinks.astro';
+import ResumeLink from '@ui/ResumeLink.astro';
 import ThemeToggle from '@components/chrome/ThemeToggle.astro';
 import { navItems } from '@data/nav';
 import { site } from '@/config';
@@ -28,6 +29,8 @@ import { site } from '@/config';
       </span>
     </div>
     <p class="mt-4 max-w-xs text-sm leading-relaxed text-(--color-text-muted)">{site.bio}</p>
+
+    <ResumeLink class="mt-5" trace="resume-rail" />
 
     <nav class="mt-11 font-mono">
       <ul>

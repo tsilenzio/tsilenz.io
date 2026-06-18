@@ -13,4 +13,5 @@ export const site = {
   locale: 'en_US',
   github: 'https://github.com/tsilenzio',
   linkedin: 'https://linkedin.com/in/tsilenzio',
+  resume: '/Taylor-Silenzio-Resume.pdf',
 } as const;
