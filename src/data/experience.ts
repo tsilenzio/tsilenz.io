@@ -6,7 +6,7 @@ export const jobs: Job[] = [
     role: 'Senior Software Engineer',
     period: '2019 — May 2026',
     description:
-      'Built event-driven data pipelines, real-time notification systems, and cross-platform services for a consumer real estate platform serving 180K+ agents. Wrote a translation sync CLI in Go, then rewrote it in Rust.',
+      'Built event-driven data pipelines, real-time notification systems, and cross-platform services for a consumer real estate platform serving 180K+ agents. Built a Rust CLI that replaced a multi-day manual translation-import process with a single sub-30ms command.',
   },
   {
     company: 'Apricity Health',
