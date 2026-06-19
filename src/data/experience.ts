@@ -25,6 +25,7 @@ export const jobs: Job[] = [
   {
     company: 'Yashi',
     role: 'Senior Software Engineer',
+    priorRoles: ['Software Engineer'],
     period: '2013 — 2016',
     description:
       'Pitched and built an API-first architecture to consolidate two platforms under a 90-day deadline, then designed role-based access control and unified authentication from scratch.',
