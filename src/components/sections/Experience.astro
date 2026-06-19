@@ -12,6 +12,9 @@ import { site } from '@/config';
         <div class="tl">
           <div class="font-mono text-xs tracking-wide text-(--color-text-muted)">{job.period}</div>
           <h3 class="mt-1 font-semibold">{job.role}</h3>
+          {job.priorRoles?.map((title) => (
+            <p class="font-medium text-(--color-text-muted)">{title}</p>
+          ))}
           <p class="text-sm text-(--color-accent)">{job.company}</p>
           <p class="mt-2 text-sm leading-relaxed text-(--color-text-muted)">{job.description}</p>
         </div>

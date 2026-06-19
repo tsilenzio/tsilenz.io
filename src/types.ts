@@ -23,6 +23,10 @@ export interface Project {
 export interface Job {
   company: string;
   role: string;
+  // Earlier titles held at the same company, most-recent-first, rendered muted beneath
+  // the current role. The resume and LinkedIn carry the per-title dates; the site shows
+  // only the overall tenure range.
+  priorRoles?: string[];
   period: string;
   description: string;
 }
