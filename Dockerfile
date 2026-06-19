@@ -5,6 +5,8 @@ RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+ARG PUBLIC_ANALYTICS_ENDPOINT
+ENV PUBLIC_ANALYTICS_ENDPOINT=$PUBLIC_ANALYTICS_ENDPOINT
 RUN pnpm build
 
 FROM nginx:alpine
