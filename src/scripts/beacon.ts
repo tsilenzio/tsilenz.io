@@ -12,7 +12,9 @@ const HEARTBEAT_MS = 15_000;
 const SESSION_IDLE_MS = 30 * 60 * 1000;
 const HOVER_THRESHOLD_MS = 300;
 const HOVER_THROTTLE_MS = 5_000;
+const ESTABLISH_TIMEOUT_MS = 5_000;
 const SESSION_KEY = 'trace_session';
+const ESTABLISHED_KEY = 'trace_established';
 
 type EventType =
   | 'page_view'
@@ -126,8 +128,95 @@ function send(payload: EventPayload): void {
   }
 }
 
+// Cold-start identity handshake. trace mints the visitor id server-side and returns it in the
+// Set-Cookie on the first cookie-less request, so several first-contact requests racing out
+// before that cookie commits (multiple tabs opening at once) each get their own id. We buffer
+// events until one establishing request has committed the cookie, coordinating across tabs with
+// the Web Locks API so exactly one tab establishes. The flag is a JS-visible marker only. The id
+// itself stays in the HttpOnly cookie and is never read or sent by the client.
+let established = false;
+const buffer: EventPayload[] = [];
+
+function flagSet(): boolean {
+  try {
+    return localStorage.getItem(ESTABLISHED_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function setFlag(): void {
+  try {
+    localStorage.setItem(ESTABLISHED_KEY, '1');
+  } catch {
+    // localStorage can be unavailable (Safari private mode, quota), in which case the handshake reruns
+  }
+}
+
+function record(payload: EventPayload): void {
+  if (established) send(payload);
+  else buffer.push(payload);
+}
+
+function flush(): void {
+  while (buffer.length > 0) {
+    const payload = buffer.shift();
+    if (payload) send(payload);
+  }
+}
+
+// Awaitable variant of send()'s fetch path: sendBeacon can't be awaited and we need to know
+// when Set-Cookie: tid has committed. Bounded by a timeout so a stalled network can't hold the
+// lock (and keep every tab buffering) for the browser's full network timeout.
+async function establishSend(payload: EventPayload): Promise<boolean> {
+  if (!ENDPOINT) return false;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ESTABLISH_TIMEOUT_MS);
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      keepalive: true,
+      signal: controller.signal,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function establish(): Promise<void> {
+  const critical = async (): Promise<void> => {
+    // A sibling tab already committed the cookie, so just go live and flush our own buffer.
+    if (flagSet()) {
+      established = true;
+      return;
+    }
+    // The page_view is buffered like everything else (uniform record routing), so promote the
+    // first buffered event to the establishing send rather than minting a second page_view.
+    const first = buffer.shift() ?? basePayload('page_view');
+    const ok = await establishSend(first);
+    if (ok) setFlag();
+    // Failed or timed out: requeue so flush()/unload still sends it cookie-less (fold-reconciled).
+    else buffer.unshift(first);
+    established = true;
+  };
+
+  if (navigator.locks?.request) {
+    await navigator.locks.request('trace-establish', { mode: 'exclusive' }, critical);
+  } else {
+    await critical();
+  }
+
+  flush();
+}
+
 function trackPageView(): void {
-  send(basePayload('page_view'));
+  record(basePayload('page_view'));
 }
 
 function trackClicks(): void {
@@ -140,7 +229,7 @@ function trackClicks(): void {
     const href = anchor?.getAttribute('href') ?? undefined;
 
     if (labelEl) {
-      send({
+      record({
         ...basePayload('internal_click'),
         element_id: labelEl.dataset.traceEvent,
         destination: href,
@@ -149,7 +238,7 @@ function trackClicks(): void {
     }
 
     if (!href || !href.startsWith('http') || href.includes(window.location.hostname)) return;
-    send({
+    record({
       ...basePayload('outbound_click'),
       destination: href,
     });
@@ -157,7 +246,13 @@ function trackClicks(): void {
 }
 
 function trackPageLeave(): void {
-  const fire = () => send(basePayload('page_leave'));
+  // page_leave fires at unload, when there's no time to wait on the handshake, so it force-sends
+  // (bypassing record) and drains any still-buffered events first. If the cookie hasn't committed
+  // yet, these go out cookie-less as orphans the trace fold reconciles, rather than being lost.
+  const fire = () => {
+    flush();
+    send(basePayload('page_leave'));
+  };
   window.addEventListener('pagehide', fire);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') fire();
@@ -168,7 +263,7 @@ function startHeartbeat(): void {
   let timer: ReturnType<typeof setInterval> | null = null;
 
   const tick = () => {
-    if (document.visibilityState === 'visible') send(basePayload('heartbeat'));
+    if (document.visibilityState === 'visible') record(basePayload('heartbeat'));
   };
 
   const start = () => {
@@ -210,7 +305,7 @@ function trackSectionViews(): void {
             state.set(el, { enteredAt: Date.now(), maxRatio: entry.intersectionRatio });
           }
         } else if (current) {
-          send({
+          record({
             ...basePayload('section_view'),
             element_id: el.dataset.traceSection,
             duration_ms: Date.now() - current.enteredAt,
@@ -251,7 +346,7 @@ function trackHovers(): void {
       if (now - last < HOVER_THROTTLE_MS) return;
       lastFiredAt.set(el, now);
 
-      send({
+      record({
         ...basePayload('hover'),
         element_id: el.dataset.traceEvent,
         duration_ms: duration,
@@ -261,12 +356,17 @@ function trackHovers(): void {
 }
 
 function boot(): void {
+  // Set before the track* calls so record() routes correctly. Returning visitors (flag set) send
+  // live and skip the lock and buffer entirely. trackPageView runs first so the page_view is
+  // buffer[0] and the handshake promotes it as the establishing send.
+  established = flagSet();
   trackPageView();
   trackClicks();
   trackPageLeave();
   trackHovers();
   trackSectionViews();
   startHeartbeat();
+  if (!established) void establish();
 }
 
 if (document.prerendering) {
