@@ -4,6 +4,11 @@ declare global {
   interface Document {
     prerendering?: boolean;
   }
+  // Non-standard navigator fields (Chromium): present at runtime, absent from lib.dom.
+  interface Navigator {
+    deviceMemory?: number;
+    connection?: { effectiveType?: string };
+  }
 }
 
 const ENDPOINT = import.meta.env.PUBLIC_ANALYTICS_ENDPOINT || '';
@@ -44,6 +49,19 @@ interface EventPayload {
   viewport_w?: number;
   viewport_h?: number;
   tz_offset?: number;
+  // Passive client signals.
+  language?: string;
+  languages?: string[];
+  platform?: string;
+  hardware_concurrency?: number;
+  device_memory?: number;
+  max_touch_points?: number;
+  color_depth?: number;
+  pixel_ratio?: number;
+  prefers_color_scheme?: string;
+  prefers_reduced_motion?: boolean;
+  connection_type?: string;
+  client_time_zone?: string;
   extra?: Record<string, unknown>;
 }
 
@@ -86,8 +104,33 @@ function ensureSessionId(): string {
   return id;
 }
 
+// Passive device signals: no-permission attributes the browser exposes for free,
+// snapshotted once since they hold for the page's lifetime. They strengthen returning-visitor
+// correlation server-side, where the trace schema already has a column for each.
+let passiveSignals: Partial<EventPayload> | undefined;
+
+function collectPassiveSignals(): Partial<EventPayload> {
+  const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return {
+    language: navigator.language || undefined,
+    languages: navigator.languages?.length ? [...navigator.languages] : undefined,
+    platform: navigator.platform || undefined,
+    hardware_concurrency: navigator.hardwareConcurrency || undefined,
+    device_memory: navigator.deviceMemory,
+    max_touch_points: navigator.maxTouchPoints,
+    color_depth: window.screen?.colorDepth,
+    pixel_ratio: window.devicePixelRatio,
+    prefers_color_scheme: dark ? 'dark' : 'light',
+    prefers_reduced_motion: reduced,
+    connection_type: navigator.connection?.effectiveType,
+    client_time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+  };
+}
+
 function basePayload(eventType: EventType): EventPayload {
   const params = new URLSearchParams(window.location.search);
+  passiveSignals ??= collectPassiveSignals();
   return {
     event_type: eventType,
     session_id: ensureSessionId(),
@@ -103,6 +146,7 @@ function basePayload(eventType: EventType): EventPayload {
     viewport_w: window.innerWidth,
     viewport_h: window.innerHeight,
     tz_offset: new Date().getTimezoneOffset(),
+    ...passiveSignals,
   };
 }
 
