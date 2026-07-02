@@ -7,7 +7,7 @@ declare global {
   // Non-standard navigator fields (Chromium): present at runtime, absent from lib.dom.
   interface Navigator {
     deviceMemory?: number;
-    connection?: { effectiveType?: string };
+    connection?: { effectiveType?: string; downlink?: number; rtt?: number; saveData?: boolean };
   }
 }
 
@@ -35,6 +35,7 @@ interface EventPayload {
   session_id: string;
   client_ts: number;
   path: string;
+  page_title?: string;
   referrer?: string;
   query?: string;
   utm_source?: string;
@@ -61,6 +62,9 @@ interface EventPayload {
   prefers_color_scheme?: string;
   prefers_reduced_motion?: boolean;
   connection_type?: string;
+  conn_downlink?: number;
+  conn_rtt?: number;
+  save_data?: boolean;
   client_time_zone?: string;
   extra?: Record<string, unknown>;
 }
@@ -124,6 +128,9 @@ function collectPassiveSignals(): Partial<EventPayload> {
     prefers_color_scheme: dark ? 'dark' : 'light',
     prefers_reduced_motion: reduced,
     connection_type: navigator.connection?.effectiveType,
+    conn_downlink: navigator.connection?.downlink,
+    conn_rtt: navigator.connection?.rtt,
+    save_data: navigator.connection?.saveData,
     client_time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
   };
 }
@@ -136,6 +143,7 @@ function basePayload(eventType: EventType): EventPayload {
     session_id: ensureSessionId(),
     client_ts: Date.now(),
     path: window.location.pathname,
+    page_title: document.title || undefined,
     referrer: document.referrer || undefined,
     query: window.location.search.slice(1) || undefined,
     utm_source: params.get('utm_source') || undefined,
