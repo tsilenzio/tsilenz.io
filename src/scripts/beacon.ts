@@ -17,9 +17,8 @@ const HEARTBEAT_MS = 15_000;
 const SESSION_IDLE_MS = 30 * 60 * 1000;
 const HOVER_THRESHOLD_MS = 300;
 const HOVER_THROTTLE_MS = 5_000;
-const ESTABLISH_TIMEOUT_MS = 5_000;
 const SESSION_KEY = 'trace_session';
-const ESTABLISHED_KEY = 'trace_established';
+const ID_MAX_AGE_SECS = 2 * 365 * 24 * 60 * 60;
 
 type EventType =
   | 'page_view'
@@ -33,6 +32,9 @@ type EventType =
 interface EventPayload {
   event_type: EventType;
   session_id: string;
+  // Client-minted visitor id, sent in every payload. trace adopts it when no
+  // valid tid cookie accompanies the request.
+  client_id: string;
   client_ts: number;
   path: string;
   page_title?: string;
@@ -141,6 +143,9 @@ function basePayload(eventType: EventType): EventPayload {
   return {
     event_type: eventType,
     session_id: ensureSessionId(),
+    // Fresh cookie read per event: a racing tab adopts the winning id, and a
+    // cookie-blocked client stays coherent on the module-held one.
+    client_id: readIdCookie() ?? visitorId,
     client_ts: Date.now(),
     path: window.location.pathname,
     page_title: document.title || undefined,
@@ -181,95 +186,64 @@ function send(payload: EventPayload): void {
   }
 }
 
-// Cold-start identity handshake. trace mints the visitor id server-side and returns it in the
-// Set-Cookie on the first cookie-less request, so several first-contact requests racing out
-// before that cookie commits (multiple tabs opening at once) each get their own id. We buffer
-// events until one establishing request has committed the cookie, coordinating across tabs with
-// the Web Locks API so exactly one tab establishes. The flag is a JS-visible marker only. The id
-// itself stays in the HttpOnly cookie and is never read or sent by the client.
-let established = false;
-const buffer: EventPayload[] = [];
+// Visitor identity. Minted here before the first event, so every request in a page
+// load carries the same id no matter how the cookie behaves (the old server-mint
+// model raced its Set-Cookie against early sends and fragmented first visits).
+// The cookie persists it across visits and tabs. trace re-issues it in every
+// response, which keeps Safari's ~7-day cap on script-written cookies from
+// shortening it.
+let visitorId = '';
 
-function flagSet(): boolean {
-  try {
-    return localStorage.getItem(ESTABLISHED_KEY) !== null;
-  } catch {
-    return false;
+function readIdCookie(): string | null {
+  const m = document.cookie.match(/(?:^|; )tid=([^;]*)/);
+  return m ? m[1] : null;
+}
+
+function writeIdCookie(id: string): void {
+  // Domain-scoped so the cookie rides to trace.tsilenz.io. Host-only on localhost.
+  const host = location.hostname;
+  const domain = host.includes('.') ? `; domain=${host.split('.').slice(-2).join('.')}` : '';
+  const secure = location.protocol === 'https:' ? '; secure' : '';
+  document.cookie = `tid=${id}; path=/; max-age=${ID_MAX_AGE_SECS}; samesite=lax${domain}${secure}`;
+}
+
+// RFC 9562 UUIDv7: 48-bit ms timestamp, then version and variant bits over
+// randomness. Time-ordered like the ids trace used to mint.
+function uuidv7(): string {
+  const b = new Uint8Array(16);
+  crypto.getRandomValues(b);
+  let ts = Date.now();
+  for (let i = 5; i >= 0; i--) {
+    b[i] = ts % 256;
+    ts = Math.floor(ts / 256);
   }
+  b[6] = (b[6] & 0x0f) | 0x70;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const hex = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
 
-function setFlag(): void {
-  try {
-    localStorage.setItem(ESTABLISHED_KEY, '1');
-  } catch {
-    // localStorage can be unavailable (Safari private mode, quota), in which case the handshake reruns
+async function initVisitorId(): Promise<void> {
+  const existing = readIdCookie();
+  if (existing) {
+    visitorId = existing;
+    return;
   }
-}
-
-function record(payload: EventPayload): void {
-  if (established) send(payload);
-  else buffer.push(payload);
-}
-
-function flush(): void {
-  while (buffer.length > 0) {
-    const payload = buffer.shift();
-    if (payload) send(payload);
-  }
-}
-
-// Awaitable variant of send()'s fetch path: sendBeacon can't be awaited and we need to know
-// when Set-Cookie: tid has committed. Bounded by a timeout so a stalled network can't hold the
-// lock (and keep every tab buffering) for the browser's full network timeout.
-async function establishSend(payload: EventPayload): Promise<boolean> {
-  if (!ENDPOINT) return false;
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ESTABLISH_TIMEOUT_MS);
-  try {
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      keepalive: true,
-      signal: controller.signal,
-    });
-    return res.ok;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function establish(): Promise<void> {
-  const critical = async (): Promise<void> => {
-    // A sibling tab already committed the cookie, so just go live and flush our own buffer.
-    if (flagSet()) {
-      established = true;
-      return;
-    }
-    // The page_view is buffered like everything else (uniform record routing), so promote the
-    // first buffered event to the establishing send rather than minting a second page_view.
-    const first = buffer.shift() ?? basePayload('page_view');
-    const ok = await establishSend(first);
-    if (ok) setFlag();
-    // Failed or timed out: requeue so flush()/unload still sends it cookie-less (fold-reconciled).
-    else buffer.unshift(first);
-    established = true;
+  const mint = () => {
+    // Re-check inside the lock: a sibling tab may have minted while we waited.
+    const won = readIdCookie();
+    visitorId = won ?? uuidv7();
+    if (!won) writeIdCookie(visitorId);
   };
-
   if (navigator.locks?.request) {
-    await navigator.locks.request('trace-establish', { mode: 'exclusive' }, critical);
+    await navigator.locks.request('trace-id', { mode: 'exclusive' }, async () => mint());
   } else {
-    await critical();
+    mint();
   }
-
-  flush();
 }
 
 function trackPageView(): void {
-  record(basePayload('page_view'));
+  send(basePayload('page_view'));
 }
 
 function trackClicks(): void {
@@ -282,7 +256,7 @@ function trackClicks(): void {
     const href = anchor?.getAttribute('href') ?? undefined;
 
     if (labelEl) {
-      record({
+      send({
         ...basePayload('internal_click'),
         element_id: labelEl.dataset.traceEvent,
         destination: href,
@@ -302,7 +276,7 @@ function trackClicks(): void {
       return;
     }
     if (!external) return;
-    record({
+    send({
       ...basePayload('outbound_click'),
       destination: href,
     });
@@ -310,11 +284,7 @@ function trackClicks(): void {
 }
 
 function trackPageLeave(): void {
-  // page_leave fires at unload, when there's no time to wait on the handshake, so it force-sends
-  // (bypassing record) and drains any still-buffered events first. If the cookie hasn't committed
-  // yet, these go out cookie-less as orphans the trace fold reconciles, rather than being lost.
   const fire = () => {
-    flush();
     send(basePayload('page_leave'));
   };
   window.addEventListener('pagehide', fire);
@@ -327,7 +297,7 @@ function startHeartbeat(): void {
   let timer: ReturnType<typeof setInterval> | null = null;
 
   const tick = () => {
-    if (document.visibilityState === 'visible') record(basePayload('heartbeat'));
+    if (document.visibilityState === 'visible') send(basePayload('heartbeat'));
   };
 
   const start = () => {
@@ -369,7 +339,7 @@ function trackSectionViews(): void {
             state.set(el, { enteredAt: Date.now(), maxRatio: entry.intersectionRatio });
           }
         } else if (current) {
-          record({
+          send({
             ...basePayload('section_view'),
             element_id: el.dataset.traceSection,
             duration_ms: Date.now() - current.enteredAt,
@@ -410,7 +380,7 @@ function trackHovers(): void {
       if (now - last < HOVER_THROTTLE_MS) return;
       lastFiredAt.set(el, now);
 
-      record({
+      send({
         ...basePayload('hover'),
         element_id: el.dataset.traceEvent,
         duration_ms: duration,
@@ -420,17 +390,22 @@ function trackHovers(): void {
 }
 
 function boot(): void {
-  // Set before the track* calls so record() routes correctly. Returning visitors (flag set) send
-  // live and skip the lock and buffer entirely. trackPageView runs first so the page_view is
-  // buffer[0] and the handshake promotes it as the establishing send.
-  established = flagSet();
-  trackPageView();
-  trackClicks();
-  trackPageLeave();
-  trackHovers();
-  trackSectionViews();
-  startHeartbeat();
-  if (!established) void establish();
+  // One-time tidy: the retired establish handshake's localStorage flag.
+  try {
+    localStorage.removeItem('trace_established');
+  } catch {
+    // storage unavailable, nothing to clean
+  }
+  // The id must exist before the first event. The lock is local, so this
+  // resolves in microseconds.
+  void initVisitorId().then(() => {
+    trackPageView();
+    trackClicks();
+    trackPageLeave();
+    trackHovers();
+    trackSectionViews();
+    startHeartbeat();
+  });
 }
 
 if (document.prerendering) {
