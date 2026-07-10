@@ -22,7 +22,9 @@ const ID_MAX_AGE_SECS = 2 * 365 * 24 * 60 * 60;
 
 type EventType =
   | 'page_view'
-  | 'page_leave'
+  | 'page_away'
+  | 'page_return'
+  | 'page_closed'
   | 'outbound_click'
   | 'internal_click'
   | 'hover'
@@ -283,13 +285,41 @@ function trackClicks(): void {
   });
 }
 
-function trackPageLeave(): void {
-  const fire = () => {
-    send(basePayload('page_leave'));
-  };
-  window.addEventListener('pagehide', fire);
+// Lifecycle on two axes. Hidden/unhidden: page_away when visibility is lost
+// (tab switch, minimize, bfcache suspension), page_return when it comes back,
+// including a bfcache revival, which restores the page without a new load so no
+// page_view fires. Open/close: page_closed only when pagehide reports the
+// instance actually destroyed (close, navigation, reload); a bfcache suspension
+// is just a deep away that may return. `away` makes the pair alternate strictly,
+// so a close reads as one away plus one closed. A browser can still kill a
+// hidden tab with no pagehide at all (mobile), so a session ending in page_away
+// with no page_closed is not proof the tab stayed open.
+function trackLifecycle(): void {
+  let away = false;
+
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') fire();
+    if (document.visibilityState === 'hidden') {
+      if (!away) {
+        away = true;
+        send(basePayload('page_away'));
+      }
+    } else if (away) {
+      away = false;
+      send(basePayload('page_return'));
+    }
+  });
+
+  window.addEventListener('pagehide', (e) => {
+    if (!e.persisted) send(basePayload('page_closed'));
+  });
+
+  window.addEventListener('pageshow', (e) => {
+    // Only bfcache restores matter (a fresh load already sent page_view), and
+    // only when the hidden state is still latched from before the suspension.
+    if (e.persisted && away) {
+      away = false;
+      send(basePayload('page_return'));
+    }
   });
 }
 
@@ -401,7 +431,7 @@ function boot(): void {
   void initVisitorId().then(() => {
     trackPageView();
     trackClicks();
-    trackPageLeave();
+    trackLifecycle();
     trackHovers();
     trackSectionViews();
     startHeartbeat();
