@@ -16,9 +16,10 @@ export const projects: Project[] = [
     slug: 'trace',
     title: 'trace',
     description:
-      'Self-hosted visitor analytics with fingerprint-based tracking, GeoIP, and a public dashboard.',
-    status: 'planned',
-    tech: ['Rust', 'SQLite', 'GeoIP'],
+      'The analytics behind this site. First-party cookie tracking, GeoIP enrichment, engagement timelines, and a live dashboard that is public to browse with identifying fields masked.',
+    status: 'active',
+    tech: ['Rust', 'axum', 'TimescaleDB', 'PostGIS'],
+    href: 'https://trace.tsilenz.io',
   },
   {
     slug: 'diorama',

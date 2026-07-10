@@ -12,3 +12,4 @@
 
 - [tsilenz.io](https://github.com/tsilenzio/tsilenz.io) - this site, open-source
 - [whoami.tsilenz.io](https://github.com/tsilenzio/whoami.tsilenz.io) - SSH identity service in Rust (in progress)
+- [trace](https://trace.tsilenz.io) - self-hosted visitor analytics in Rust, live dashboard public to browse
