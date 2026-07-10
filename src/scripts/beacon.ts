@@ -167,13 +167,14 @@ function send(payload: EventPayload): void {
       const blob = new Blob([body], { type: 'application/json' });
       navigator.sendBeacon(ENDPOINT, blob);
     } else {
+      // The surrounding catch only sees sync throws, so failures land here.
       fetch(ENDPOINT, {
         method: 'POST',
         body,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         keepalive: true,
-      });
+      }).catch(() => {});
     }
   } catch {
     // analytics must never surface to the user
@@ -289,7 +290,18 @@ function trackClicks(): void {
       return;
     }
 
-    if (!href || !href.startsWith('http') || href.includes(window.location.hostname)) return;
+    if (!href || !href.startsWith('http')) return;
+    // A URL that merely contains this hostname (tsilenz.io.evil.com, or the name
+    // in a path) still counts as outbound. Subdomains stay internal.
+    let external: boolean;
+    try {
+      const target = new URL(href).hostname;
+      const here = window.location.hostname;
+      external = target !== here && !target.endsWith(`.${here}`);
+    } catch {
+      return;
+    }
+    if (!external) return;
     record({
       ...basePayload('outbound_click'),
       destination: href,
