@@ -310,7 +310,12 @@ function trackLifecycle(): void {
   });
 
   window.addEventListener('pagehide', (e) => {
-    if (!e.persisted) send(basePayload('page_closed'));
+    if (!e.persisted) {
+      // Latch: some clients fire pagehide before visibilitychange at close, and
+      // a trailing away after the closed would read backwards in the feed.
+      away = true;
+      send(basePayload('page_closed'));
+    }
   });
 
   window.addEventListener('pageshow', (e) => {
