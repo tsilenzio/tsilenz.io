@@ -56,9 +56,10 @@ const ogImageURL = new URL(ogImage, Astro.site).href;
 
     <title>{title}</title>
 
-    {/* Inline theme init to prevent FOUC */}
+    {/* Inline theme init to prevent FOUC, plus the js flag the reveal styles key on */}
     <script is:inline>
       (function () {
+        document.documentElement.classList.add('js');
         const theme = localStorage.getItem('theme');
         const stored = theme === 'light' || theme === 'dark' ? theme : null;
         const preferLight = window.matchMedia('(prefers-color-scheme: light)').matches;
