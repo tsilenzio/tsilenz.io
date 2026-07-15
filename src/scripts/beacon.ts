@@ -248,6 +248,19 @@ function trackPageView(): void {
   send(basePayload('page_view'));
 }
 
+// A URL that merely contains this hostname (tsilenz.io.evil.com, or the name
+// in a path) still counts as outbound. Subdomains stay internal.
+function isExternalHref(href: string | undefined): boolean {
+  if (!href || !href.startsWith('http')) return false;
+  try {
+    const target = new URL(href).hostname;
+    const here = window.location.hostname;
+    return target !== here && !target.endsWith(`.${here}`);
+  } catch {
+    return false;
+  }
+}
+
 function trackClicks(): void {
   document.addEventListener('click', (e) => {
     const target = e.target as Element | null;
@@ -258,26 +271,17 @@ function trackClicks(): void {
     const href = anchor?.getAttribute('href') ?? undefined;
 
     if (labelEl) {
+      // A labeled link to an external destination is still an outbound click,
+      // so the destination stats see it. The label rides along as element_id.
       send({
-        ...basePayload('internal_click'),
+        ...basePayload(isExternalHref(href) ? 'outbound_click' : 'internal_click'),
         element_id: labelEl.dataset.traceEvent,
         destination: href,
       });
       return;
     }
 
-    if (!href || !href.startsWith('http')) return;
-    // A URL that merely contains this hostname (tsilenz.io.evil.com, or the name
-    // in a path) still counts as outbound. Subdomains stay internal.
-    let external: boolean;
-    try {
-      const target = new URL(href).hostname;
-      const here = window.location.hostname;
-      external = target !== here && !target.endsWith(`.${here}`);
-    } catch {
-      return;
-    }
-    if (!external) return;
+    if (!isExternalHref(href)) return;
     send({
       ...basePayload('outbound_click'),
       destination: href,
