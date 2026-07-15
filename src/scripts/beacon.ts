@@ -301,11 +301,18 @@ function trackClicks(): void {
 function trackLifecycle(): void {
   let away = false;
 
+  // Leave-like events carry the pointer summary so the page's trajectory
+  // evidence ships before the tab can die.
+  const leave = (type: EventType) => {
+    const extra = pointerExtra();
+    send(extra ? { ...basePayload(type), extra } : basePayload(type));
+  };
+
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       if (!away) {
         away = true;
-        send(basePayload('page_away'));
+        leave('page_away');
       }
     } else if (away) {
       away = false;
@@ -318,7 +325,7 @@ function trackLifecycle(): void {
       // Latch: some clients fire pagehide before visibilitychange at close, and
       // a trailing away after the closed would read backwards in the feed.
       away = true;
-      send(basePayload('page_closed'));
+      leave('page_closed');
     }
   });
 
@@ -394,6 +401,114 @@ function trackSectionViews(): void {
   sections.forEach((el) => observer.observe(el));
 }
 
+// Pointer-trajectory summary for the analytics scoring. Human motion has
+// physics: curved paths, spread-out velocities, overshoot. Automation dispatches
+// a click with at most one preceding move, or tweens in a straight line at
+// constant speed. Only the summary ever leaves the page, never raw coordinates.
+// Touch moves are counted but not measured (tap physics is too weak to score),
+// and pen keeps its own count instead of borrowing mouse physics until it shows
+// up in real data.
+const POINTER_SAMPLE_MS = 50;
+const POINTER_MAX_SAMPLES = 2000;
+const TELEPORT_PX = 300;
+const TELEPORT_MS = 25;
+
+const ptr = {
+  moves: 0, // sampled mouse moves that fed the path/speed accumulators
+  rawMouseMoves: 0,
+  pathPx: 0,
+  teleports: 0,
+  noPathClicks: 0,
+  types: { mouse: 0, touch: 0, pen: 0 } as Record<string, number>,
+  // Welford accumulator over per-sample speeds (px/ms)
+  speedN: 0,
+  speedMean: 0,
+  speedM2: 0,
+};
+let ptrFirst: { x: number; y: number } | null = null;
+let ptrLast = { x: 0, y: 0, t: 0 };
+let ptrLastRaw = { x: 0, y: 0, t: 0 };
+
+function trackPointer(): void {
+  document.addEventListener(
+    'pointermove',
+    (e) => {
+      // Page-dispatched synthetics are untrusted and must not fake organic
+      // motion. CDP-driven automation stays trusted and gets judged on physics.
+      if (!e.isTrusted) return;
+      const type = e.pointerType || 'mouse';
+      if (type in ptr.types) ptr.types[type]++;
+      if (type !== 'mouse') return;
+      ptr.rawMouseMoves++;
+
+      const t = e.timeStamp;
+      const x = e.clientX;
+      const y = e.clientY;
+
+      // Teleport check runs on the raw stream: two events a frame or two apart
+      // should not be hundreds of pixels apart under human motion.
+      if (ptrLastRaw.t && t - ptrLastRaw.t < TELEPORT_MS) {
+        if (Math.hypot(x - ptrLastRaw.x, y - ptrLastRaw.y) > TELEPORT_PX) ptr.teleports++;
+      }
+      ptrLastRaw = { x, y, t };
+
+      if (ptr.moves >= POINTER_MAX_SAMPLES) return;
+      if (ptrLast.t && t - ptrLast.t < POINTER_SAMPLE_MS) return;
+
+      if (!ptrFirst) {
+        ptrFirst = { x, y };
+        ptrLast = { x, y, t };
+        ptr.moves = 1;
+        return;
+      }
+
+      const dt = t - ptrLast.t;
+      const dist = Math.hypot(x - ptrLast.x, y - ptrLast.y);
+      ptr.pathPx += dist;
+      const speed = dist / dt;
+      ptr.speedN++;
+      const delta = speed - ptr.speedMean;
+      ptr.speedMean += delta / ptr.speedN;
+      ptr.speedM2 += delta * (speed - ptr.speedMean);
+      ptr.moves++;
+      ptrLast = { x, y, t };
+    },
+    { passive: true },
+  );
+
+  document.addEventListener('click', (e) => {
+    // Keyboard and assistive activation is exempt by its event shape (detail 0,
+    // no pointer type). The penalty is for a trusted click claiming a mouse
+    // that never produced a single move on this page.
+    if (!e.isTrusted || e.detail === 0) return;
+    const type = e instanceof PointerEvent ? e.pointerType : '';
+    if (type === 'mouse' && ptr.rawMouseMoves === 0) ptr.noPathClicks++;
+  });
+}
+
+/** Cumulative summary as an `extra` payload, or undefined before any pointer activity. */
+function pointerExtra(): Record<string, unknown> | undefined {
+  const seen = ptr.types.mouse + ptr.types.touch + ptr.types.pen;
+  if (seen === 0 && ptr.noPathClicks === 0) return undefined;
+  const disp = ptrFirst ? Math.hypot(ptrLast.x - ptrFirst.x, ptrLast.y - ptrFirst.y) : 0;
+  // A path that returns to its start has a huge ratio, so cap it instead of sending Infinity.
+  const straightness = disp > 1 ? Math.min(99, ptr.pathPx / disp) : ptr.pathPx > 0 ? 99 : 0;
+  const speedVar = ptr.speedN > 1 ? ptr.speedM2 / (ptr.speedN - 1) : 0;
+  return {
+    pointer: {
+      moves: ptr.moves,
+      path_px: Math.round(ptr.pathPx),
+      net_px: Math.round(disp),
+      straightness: Number(straightness.toFixed(2)),
+      speed_mean: Number(ptr.speedMean.toFixed(3)),
+      speed_var: Number(speedVar.toFixed(4)),
+      teleports: ptr.teleports,
+      no_path_clicks: ptr.noPathClicks,
+      types: { ...ptr.types },
+    },
+  };
+}
+
 function trackHovers(): void {
   const elements = document.querySelectorAll<HTMLElement>('[data-trace-event]');
   if (elements.length === 0) return;
@@ -441,6 +556,7 @@ function boot(): void {
     trackPageView();
     trackClicks();
     trackLifecycle();
+    trackPointer();
     trackHovers();
     trackSectionViews();
     startHeartbeat();
