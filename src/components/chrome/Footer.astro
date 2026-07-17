@@ -12,9 +12,14 @@ const year = new Date().getFullYear();
       <SocialLinks trace="footer" />
     </div>
     <p class="mt-6 text-xs leading-relaxed text-(--color-text-muted)">
-      This site sends visit events to a self-hosted analytics service on my homelab. A long-lived
-      cookie identifies returning visitors. IP address, browser, and approximate location are
-      recorded. No third-party trackers and no advertising. The dashboard is
+      This site runs self-hosted analytics on my homelab, with no third-party trackers and no
+      advertising. The data stays on my own hardware. A long-lived first-party cookie identifies
+      returning visitors. Each visit records your IP address, the approximate location and ISP
+      derived from it, browser and device details, and on-page behavior: clicks, hovers, time per
+      section, and an aggregate summary of pointer motion used to tell humans from bots (raw
+      coordinates never leave the page). If your browser sends Global Privacy Control, the visit is
+      still recorded, but the public dashboard only ever counts it toward the totals, never shows
+      it. The dashboard is
       <a href="https://trace.tsilenz.io" data-trace-event="footer-trace-live">public to browse</a>,
       with identifying fields masked.
     </p>
