@@ -29,6 +29,3 @@ pnpm-debug.log*
 *~
 Thumbs.db
 desktop.ini
-
-# private working notes (own nested repo; keeps tooling from scanning archived prototypes)
-.docs/
