@@ -1,8 +1,8 @@
 ---
-import type { BadgeVariant } from '@/types';
+import type { ProjectStatus } from '@/types';
 
 interface Props {
-  variant: BadgeVariant;
+  variant: ProjectStatus;
   class?: string;
 }
 
@@ -24,8 +24,7 @@ const { variant, class: className } = Astro.props;
   }
 
   /* All variants read the --status-* palette (defined per theme in global.css). */
-  .badge-in-progress,
-  .badge-experimental {
+  .badge-in-progress {
     background-color: var(--status-progress-bg);
     color: var(--status-progress-fg);
     border: 1px solid var(--status-progress-border);

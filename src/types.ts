@@ -1,8 +1,5 @@
 export type ProjectStatus = 'active' | 'in-progress' | 'on-hold' | 'planned';
 
-// Badge variants are the project statuses plus the terminal's "experimental" tag.
-export type BadgeVariant = ProjectStatus | 'experimental';
-
 export const STATUS_LABEL: Record<ProjectStatus, string> = {
   active: 'Active',
   'in-progress': 'In Progress',
