@@ -17,6 +17,8 @@ const HEARTBEAT_MS = 15_000;
 const SESSION_IDLE_MS = 30 * 60 * 1000;
 const HOVER_THRESHOLD_MS = 300;
 const HOVER_THROTTLE_MS = 5_000;
+const TEXT_SETTLE_MS = 500;
+const TEXT_THROTTLE_MS = 5_000;
 const SESSION_KEY = 'trace_session';
 const ID_MAX_AGE_SECS = 2 * 365 * 24 * 60 * 60;
 
@@ -29,6 +31,8 @@ type EventType =
   | 'internal_click'
   | 'hover'
   | 'section_view'
+  | 'text_select'
+  | 'text_copy'
   | 'heartbeat';
 
 interface EventPayload {
@@ -543,6 +547,68 @@ function trackHovers(): void {
   });
 }
 
+// Selecting or copying a command is the closest thing to intent the page can see: it
+// means someone is about to paste it into a terminal. Only elements carrying
+// data-trace-copy are watched, so this stays off the click and hover streams.
+function trackTextIntent(): void {
+  const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-trace-copy]'));
+  if (elements.length === 0) return;
+
+  // The tracked element holding the current selection, if the selection sits wholly
+  // inside one. A selection spilling into surrounding copy has no common ancestor
+  // inside the element and reads as undefined, which is the honest answer.
+  const selectedIn = (): HTMLElement | undefined => {
+    const sel = document.getSelection();
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0) return undefined;
+    if (!sel.toString().trim()) return undefined;
+    const node = sel.getRangeAt(0).commonAncestorContainer;
+    return elements.find((el) => el.contains(node));
+  };
+
+  // Separate windows per signal so a select never throttles the copy that follows it.
+  const lastSelect = new WeakMap<HTMLElement, number>();
+  const lastCopy = new WeakMap<HTMLElement, number>();
+  const throttled = (seen: WeakMap<HTMLElement, number>, el: HTMLElement): boolean => {
+    const now = Date.now();
+    if (now - (seen.get(el) ?? 0) < TEXT_THROTTLE_MS) return true;
+    seen.set(el, now);
+    return false;
+  };
+
+  // selectionchange fires on every mousemove of a drag, so wait for it to go quiet
+  // before calling it a selection. startedAt survives the intermediate firings.
+  let settle: ReturnType<typeof setTimeout> | null = null;
+  let startedAt = 0;
+
+  document.addEventListener('selectionchange', () => {
+    if (settle !== null) clearTimeout(settle);
+    else startedAt = Date.now();
+
+    settle = setTimeout(() => {
+      settle = null;
+      const el = selectedIn();
+      if (!el || throttled(lastSelect, el)) return;
+      send({
+        ...basePayload('text_select'),
+        element_id: el.dataset.traceCopy,
+        // Drag time, with the settle window backed out so a double-click reads near zero.
+        duration_ms: Math.max(0, Date.now() - startedAt - TEXT_SETTLE_MS),
+      });
+    }, TEXT_SETTLE_MS);
+  });
+
+  // Fires for Cmd-C and the context-menu copy alike. The selected text itself is never
+  // sent, only which element it came from.
+  document.addEventListener('copy', () => {
+    const el = selectedIn();
+    if (!el || throttled(lastCopy, el)) return;
+    send({
+      ...basePayload('text_copy'),
+      element_id: el.dataset.traceCopy,
+    });
+  });
+}
+
 function boot(): void {
   // One-time tidy: the retired establish handshake's localStorage flag.
   try {
@@ -558,6 +624,7 @@ function boot(): void {
     trackLifecycle();
     trackPointer();
     trackHovers();
+    trackTextIntent();
     trackSectionViews();
     startHeartbeat();
   });

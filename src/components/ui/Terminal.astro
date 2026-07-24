@@ -36,7 +36,7 @@ const { command, label = 'Terminal', badge = 'experimental', class: className } 
   </div>
   <div class="flex items-center gap-2">
     <span class="select-none text-(--color-text-muted)">$</span>
-    <code class="text-(--color-accent)">{command}</code>
+    <code class="text-(--color-accent)" data-trace-copy="ssh-command">{command}</code>
   </div>
   <p class="mt-3 font-sans text-xs text-(--color-text-muted)">
     <slot />
