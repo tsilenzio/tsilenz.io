@@ -11,9 +11,6 @@ const { slug, title, description, status, tech, href } = Astro.props;
 // Whole card is one link when there's an href, so the pointer cursor covers the
 // entire surface rather than just the title (matches the blog-entry pattern).
 const Tag = href ? 'a' : 'div';
-// In-page anchors (the whoami card jumps to the ssh box) stay in the same tab;
-// external project links open a new one. Both keep data-trace-event so the beacon
-// still records the click (internal_click vs outbound_click, keyed off the label).
 const isInternal = href?.startsWith('#') ?? false;
 const linkAttrs = href
   ? {

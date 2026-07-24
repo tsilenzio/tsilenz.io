@@ -10,9 +10,7 @@ export const projects: Project[] = [
       'An SSH server that identifies visitors by their public keys against GitHub. Connect and see what it knows about you.',
     status: 'in-progress',
     tech: ['Rust', 'SSH', 'PostgreSQL', 'GitHub API'],
-    // Repo is private (closed source for the project's life), so there's no source
-    // link. The card jumps to the live ssh box in About instead. See ProjectCard's
-    // in-page anchor handling.
+    // Repo is private, so the card jumps to the live ssh box instead of a source link.
     href: '#try-ssh',
   },
   {

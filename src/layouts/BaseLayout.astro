@@ -80,11 +80,12 @@ const ogImageURL = new URL(ogImage, Astro.site).href;
     <script src="@scripts/reveal.ts"></script>
     <script src="@scripts/beacon.ts"></script>
     {
-      /* scroll-spy and mobile-nav are home-only behaviours, but Astro hoists scripts
-        reliably only as unconditional children of the layout that renders <html>. Both
-        guard on their target elements, so they no-op on pages without the rail/menu. */
+      /* The three below are home-only behaviours, but Astro hoists scripts reliably
+        only as unconditional children of the layout that renders <html>. Each guards on
+        its target element, so they no-op on pages without the rail/menu/ssh box. */
     }
     <script src="@scripts/scroll-spy.ts"></script>
     <script src="@scripts/mobile-nav.ts"></script>
+    <script src="@scripts/ssh-flash.ts"></script>
   </body>
 </html>
