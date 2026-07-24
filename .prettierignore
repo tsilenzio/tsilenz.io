@@ -4,3 +4,5 @@ dist/
 pnpm-lock.yaml
 public/
 CHANGELOG.md
+.docs/
+.engrata/
