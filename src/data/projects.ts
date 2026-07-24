@@ -10,7 +10,10 @@ export const projects: Project[] = [
       'An SSH server that identifies visitors by their public keys against GitHub. Connect and see what it knows about you.',
     status: 'in-progress',
     tech: ['Rust', 'SSH', 'PostgreSQL', 'GitHub API'],
-    href: 'https://github.com/tsilenzio/whoami.tsilenz.io',
+    // Repo is private (closed source for the project's life), so there's no source
+    // link. The card jumps to the live ssh box in About instead. See ProjectCard's
+    // in-page anchor handling.
+    href: '#try-ssh',
   },
   {
     slug: 'trace',

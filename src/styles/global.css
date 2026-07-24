@@ -144,6 +144,28 @@ code {
   }
 }
 
+/* One-shot accent ping when the whoami project card jumps to the ssh box
+   (href="#try-ssh"). :target matches only while the fragment is present, so it
+   fires on arrival from the card, not on a normal page load, and plays once. */
+#try-ssh:target {
+  animation: ssh-ping 1.1s ease-out;
+}
+
+@keyframes ssh-ping {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-accent) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #try-ssh:target {
+    animation: none;
+  }
+}
+
 /* prose styles for blog posts */
 .prose {
   line-height: 1.75;

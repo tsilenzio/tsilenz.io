@@ -60,8 +60,8 @@ import { site } from '@/config';
     existed.
   </p>
 
-  <div class="mt-8">
-    <Terminal command="ssh whoami.tsilenz.io">
+  <div id="try-ssh" class="mt-8 scroll-mt-24">
+    <Terminal command="ssh whoami.tsilenz.io" badge={null}>
       See what my SSH server knows about you. Built in
       <a href={site.github} target="_blank" rel="noopener noreferrer">Rust</a>.
     </Terminal>
